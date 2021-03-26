@@ -1,4 +1,5 @@
-# DOWNLOAD: $ pip install beautifulsoup4
+# DOWNLOAD beautifulsoup4: $ pip install beautifulsoup4
+# DOWNLOAD lxml's HTML parser: $ pip install lxml
 # DOCUMENTATION: https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 
 html_doc = """<html><head><title>The Dormouse's story</title></head>
@@ -16,6 +17,6 @@ and they lived at the bottom of a well.</p>
 
 from bs4 import BeautifulSoup
 
-soup = BeautifulSoup(html_doc, 'html.parser')
+soup = BeautifulSoup(html_doc, 'lxml')
 
 print(soup.prettify())
