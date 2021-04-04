@@ -2,21 +2,18 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import os
-import numpy as np
 import pandas as pd
 
-#경로는 본인 디렉토리 맞게 변경해주세요
-PATH = "/Users/kim/Desktop/stock-prediction-model"
+PATH = "./"
 os.chdir(PATH)
 
 
-def crawler(company_code, maxpage):
+def crawl(company_code, max_page):
     page = 1
     title_result = []
     content_result = []
     date_res = []
-    while page <= int(maxpage):
-
+    while page <= int(max_page):
         url = 'https://finance.naver.com/item/news_news.nhn?code=' + str(company_code) + '&page=' + str(page)
         source_code = requests.get(url).text
         html = BeautifulSoup(source_code, "lxml")
@@ -42,18 +39,16 @@ def crawler(company_code, maxpage):
         for d in date_result:
             date_res.append(str(d))
 
-        # 변수들 합쳐서 해당 디렉토리에 csv파일로 저장하기
-
-
+        # 변수들 합쳐서 해당 디렉토리에 csv 파일로 저장하기
         for link in link_result:
             url = link
             source_code = requests.get(url).text
             html = BeautifulSoup(source_code, "lxml")
             contents = html.select("div#news_read")
             text = str(contents)
-            b = text.find("<span")
+            text.find("<span")
             a = text.find("<a")
-            text = filename_remover(text[0:a])
+            text = remove_filename(text[0:a])
             content_result.append(text)
 
         page += 1
@@ -63,11 +58,12 @@ def crawler(company_code, maxpage):
     df_result.to_csv(company_code + '.csv', mode='w', encoding='utf-8-sig')
     # 종목 리스트 파일 열기
 
+
 # html 태그 제거하는 코드
-def filename_remover(string):
+def remove_filename(string):
     cleaner = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')  # <tag>, &nbsp 등등 제거
     string = re.sub(cleaner, '', string)
-    while (string[-1] == '.'):
+    while string[-1] == '.':
         string = string[:-1]  # 끝에 . 제거 ex) test... -> test
         non_directory_letter = ['/', ':', '*', '?', '<', '>', '|']  # 경로 금지 문자열 제거
         for str_ in non_directory_letter:
@@ -75,8 +71,9 @@ def filename_remover(string):
                 string = string.replace(str_, "")
     return string
 
+
 # 회사명을 종목코드로 변환
-def convert_to_code(company, maxpage):
+def convert_to_code(company, max_page):
     data = pd.read_csv('company_list.txt', dtype=str, sep='\t')  # 종목코드 추출
     company_name = data['회사명']
     keys = [i for i in company_name]  # 데이터프레임에서 리스트로 바꾸기
@@ -88,18 +85,18 @@ def convert_to_code(company, maxpage):
 
     pattern = '[a-zA-Z가-힣]+'
 
-    if bool(re.match(pattern, company)) == True:  # Input에 이름으로 넣었을 때
+    if bool(re.match(pattern, company)):  # Input에 이름으로 넣었을 때
         company_code = dict_result.get(str(company))
-        crawler(company_code, maxpage)
+        crawl(company_code, max_page)
 
-
-    else:  # Input에 종목코드로 넣었을 때
+    # Input 에 종목코드로 넣었을 때
+    else:
         company_code = str(company)
-        crawler(company_code, maxpage)
+        crawl(company_code, max_page)
 
 
-def start_crolling():
-    info_main = input("=" * 50 + "\n" + "실시간 뉴스기사 다운받기." + "\n" + " 시작하시려면 Enter를 눌러주세요." + "\n" + "=" * 50)
+def start():
+    input("=" * 50 + "\n" + "실시간 뉴스기사 다운받기." + "\n" + "시작하시려면 Enter 를 눌러주세요." + "\n" + "=" * 50)
     company = input("종목 이름이나 코드 입력: ")
-    maxpage = input("최대 뉴스 페이지 수 입력: ")
-    convert_to_code(company, maxpage)
+    max_page = input("최대 뉴스 페이지 수 입력: ")
+    convert_to_code(company, max_page)
