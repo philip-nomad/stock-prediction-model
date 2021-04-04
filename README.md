@@ -6,7 +6,7 @@
 ### How (crawling)
 
 ```python
-def start_crolling():
+def start():
 ```
 
 - 크롤링 시작 (종목 이름이나 코드를 받음)
@@ -19,7 +19,7 @@ def convert_to_code(company, maxpage):
 - 이름과 종목코드로 분기점 나뉨
 
 ```python
-def crawler(company_code, maxpage):
+def crawl(company_code, maxpage):
 ```
 
 - 실질적인 크롤링 부분 title, content, date로 나뉘어서 (종목코드).csv 파일로 변환해서 저장
