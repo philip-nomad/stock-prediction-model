@@ -69,7 +69,9 @@ def remove_filename(string):
         for str_ in non_directory_letter:
             if str_ in string:
                 string = string.replace(str_, "")
-    return string
+    cleaned_text = re.sub('[a-zA-Z]','',string)
+    cleaned_text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', cleaned_text)
+    return cleaned_text
 
 
 # 회사명을 종목코드로 변환
@@ -95,8 +97,9 @@ def convert_to_code(company, max_page):
         crawl(company_code, max_page)
 
 
-def start():
-    input("=" * 50 + "\n" + "실시간 뉴스기사 다운받기." + "\n" + "시작하시려면 Enter 를 눌러주세요." + "\n" + "=" * 50)
-    company = input("종목 이름이나 코드 입력: ")
-    max_page = input("최대 뉴스 페이지 수 입력: ")
-    convert_to_code(company, max_page)
+def start(code_lists):
+
+    for code in code_lists:
+        company = code
+        max_page = 1
+        convert_to_code(company, max_page)
