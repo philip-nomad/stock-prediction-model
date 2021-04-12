@@ -1,8 +1,9 @@
-from bs4 import BeautifulSoup
-import requests
-import re
 import os
+import re
+
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 PATH = "./"
 os.chdir(PATH)
