@@ -1,31 +1,45 @@
 # Hannanum
 from konlpy.tag import Hannanum
+import pandas as pd
+import csv
+
 hannanum = Hannanum()
 
-tf = open("test1.txt",'r',encoding='utf-8')
-testfile = tf.read()
+def preprocess(code):
+    time_result = []
+    title_result = []
+    context_result = []
 
-hannanum.analyze #구 Phrase 분석
-hannanum.morphs # 형태소 분석
-hannanum.nouns # 명사 분석
-hannanum.pos # 형태소 분석 태깅
-print("hannanum analyze")
-a = hannanum.analyze(testfile)
-print(a)
-print("hannanum pos")
-print(hannanum.pos(testfile))
-#예시
+    input_titles = []
+    input_contexts = []
 
-#Kkma
-from konlpy.tag import Kkma
-kkma = Kkma()
+    with open("./news/"+code+'.csv', 'r', -1, 'utf-8') as news:
+        next(news)
 
-kkma.morphs # 형태소 분석
-kkma.nouns # 명사 분석
-kkma.pos # 형태소 분석 태깅
-kkma.sentences #문장 분석
+        for line in csv.reader(news):
+            time_result.append(line[1])
+            title_result.append(line[2])
+            context_result.append(line[3])
 
-print("kkma pos")
-print(kkma.pos(testfile))
-#예시
+    for title in title_result:
+        text = hannanum.nouns(title)
+        str = ""
+        for t in text:
+            str += t + " "
+        input_titles.append(str)
 
+    for context in context_result:
+        text = hannanum.nouns(context)
+        str = ""
+        for t in text:
+            str += t + " "
+        input_contexts.append(str)
+    f = open("./words/" + code + '.csv', "w+")
+    f.close()
+    columns = ['time', 'title', 'context']
+    df = pd.DataFrame(columns=columns)
+    df["time"] = time_result
+    df["title"] = input_titles
+    df["context"] = input_contexts
+    df.to_csv("./words/"+code+'.csv', index=False)
+    ds = pd.read_csv("./words/"+code+'.csv')
