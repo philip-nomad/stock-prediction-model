@@ -8,9 +8,22 @@ import pandas as pd
 STOCK_CODE = '005930'
 stock = fdr.DataReader(STOCK_CODE)
 
-stock['Year'] = stock.index.year
-stock['Month'] = stock.index.month
-stock['Day'] = stock.index.day
+stock_file_name = '005930.KS.csv'
+encoding = 'euc-kr'  # 문자 인코딩
+names = ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+raw_dataframe = pd.read_csv(stock_file_name, names=names, encoding=encoding)  # 판다스이용 csv파일 로딩
+raw_dataframe.info()  # 데이터 정보 출력
+del raw_dataframe['Date']  # 위 줄과 같은 효과
+stock_info = raw_dataframe.values[1:].astype(np.float)  # 금액&거래량 문자열을 부동소수점형으로 변환한다
+print("stock_info.shape: ", stock_info.shape)
+print("stock_info[0]: ", stock_info[0])
+ori_price = stock_info[:, :-1]
+
+
+
+#stock['Year'] = stock.index.year
+#stock['Month'] = stock.index.month
+#stock['Day'] = stock.index.day
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -23,6 +36,8 @@ from sklearn.model_selection import train_test_split
 
 x_train, x_test, y_train, y_test = train_test_split(df.drop('Close', 1), df['Close'], test_size=0.2, random_state=0,
                                                     shuffle=False)
+
+
 
 import tensorflow as tf
 
@@ -91,9 +106,24 @@ history = model.fit(train_data,
 
 model.load_weights(filename)
 pred = model.predict(test_data)
+print(pred.shape)
+print(pred[0])
+print(pred[1])
 
-plt.figure(figsize=(12, 9))
-plt.plot(np.asarray(y_test)[20:], label='actual')
-plt.plot(pred, label='prediction')
-plt.legend()
-plt.show()
+#역정규화 : 정규화된 값을 원래의 값으로 되돌림
+def reverse_min_max_scaling(org_x, x): #종가 예측값
+    org_x_np = np.asarray(org_x)
+    x_np = np.asarray(x)
+    return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
+
+pred = reverse_min_max_scaling(ori_price,pred) #역정규화
+print(pred)
+print(pred[0])
+
+
+#print(pred)
+#plt.figure(figsize=(12, 9))
+#plt.plot(np.asarray(y_test)[20:], label='actual')
+#plt.plot(pred, label='prediction')
+#plt.legend()
+#plt.show()
