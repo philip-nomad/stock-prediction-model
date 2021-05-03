@@ -1,4 +1,5 @@
 import tensorflow.compat.v1 as tf
+
 tf.disable_v2_behavior()
 import numpy as np
 import pandas as pd
@@ -13,6 +14,7 @@ tf.set_random_seed(777)
 # Standardization
 def data_standardization(x):
     x_np = np.asarray(x)
+
     return (x_np - x_np.mean()) / x_np.std()
 
 
@@ -21,6 +23,7 @@ def data_standardization(x):
 # Min-Max scaling
 def min_max_scaling(x):
     x_np = np.asarray(x)
+
     return (x_np - x_np.min()) / (x_np.max() - x_np.min() + 1e-7)  # 1e-7은 0으로 나누는 오류 예방차원
 
 
@@ -29,6 +32,7 @@ def min_max_scaling(x):
 def reverse_min_max_scaling(org_x, x):
     org_x_np = np.asarray(org_x)
     x_np = np.asarray(x)
+
     return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
 
 
@@ -40,7 +44,7 @@ seq_length = 28  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
 rnn_cell_hidden_dim = 20  # 각 셀의 (hidden)출력 크기
 forget_bias = 1.0  # 망각편향(기본값 1.0)
 num_stacked_layers = 1  # stacked LSTM layers 개수
-keep_prob = 1.0  # dropout할 때 keep할 비율
+keep_prob = 1.0  # dropout 할 때 keep 할 비율
 
 epoch_num = 1000  # 에폭 횟수(학습용전체데이터를 몇 회 반복해서 학습할 것인가 입력)
 learning_rate = 0.01  # 학습률
@@ -125,7 +129,7 @@ print("X: ", X)
 Y = tf.placeholder(tf.float32, [None, 1])
 print("Y: ", Y)
 
-# 검증용 측정지표를 산출하기 위한 targets, predictions를 생성한다
+# 검증용 측정지표를 산출하기 위한 targets, predictions 를 생성한다
 targets = tf.placeholder(tf.float32, [None, 1])
 print("targets: ", targets)
 
@@ -135,7 +139,7 @@ print("predictions: ", predictions)
 
 # 모델(LSTM 네트워크) 생성
 def lstm_cell():
-    # LSTM셀을 생성
+    # LSTM 셀을 생성
     # num_units: 각 Cell 출력 크기
     # forget_bias:  to the biases of the forget gate
     #              (default: 1)  in order to reduce the scale of forgetting in the beginning of the training.
@@ -148,21 +152,21 @@ def lstm_cell():
     return cell
 
 
-# num_stacked_layers개의 층으로 쌓인 Stacked RNNs 생성
+# num_stacked_layers 개의 층으로 쌓인 Stacked RNNs 생성
 stackedRNNs = [lstm_cell() for _ in range(num_stacked_layers)]
 multi_cells = tf.contrib.rnn.MultiRNNCell(stackedRNNs, state_is_tuple=True) if num_stacked_layers > 1 else lstm_cell()
 
-# RNN Cell(여기서는 LSTM셀임)들을 연결
+# RNN Cell(여기서는 LSTM 셀임)들을 연결
 hypothesis, _states = tf.nn.dynamic_rnn(multi_cells, X, dtype=tf.float32)
 print("hypothesis: ", hypothesis)
 
-# [:, -1]를 잘 살펴보자. LSTM RNN의 마지막 (hidden)출력만을 사용했다.
-# 과거 여러 거래일의 주가를 이용해서 다음날의 주가 1개를 예측하기때문에 MANY-TO-ONE형태이다
+# [:, -1]를 잘 살펴보자. LSTM RNN 의 마지막 (hidden)출력만을 사용했다.
+# 과거 여러 거래일의 주가를 이용해서 다음날의 주가 1개를 예측하기때문에 MANY-TO-ONE 형태이다
 hypothesis = tf.contrib.layers.fully_connected(hypothesis[:, -1], output_data_column_cnt, activation_fn=tf.identity)
 
 # 손실함수로 평균제곱오차를 사용한다
 loss = tf.reduce_sum(tf.square(hypothesis - Y))
-# 최적화함수로 AdamOptimizer를 사용한다
+# 최적화함수로 AdamOptimizer 를 사용한다
 optimizer = tf.train.AdamOptimizer(learning_rate)
 # optimizer = tf.train.RMSPropOptimizer(learning_rate) # LSTM과 궁합 별로임
 
@@ -186,12 +190,12 @@ print('학습을 시작합니다...')
 for epoch in range(epoch_num):
     _, _loss = sess.run([train, loss], feed_dict={X: trainX, Y: trainY})
     if ((epoch + 1) % 100 == 0) or (epoch == epoch_num - 1):  # 100번째마다 또는 마지막 epoch인 경우
-        # 학습용데이터로 rmse오차를 구한다
+        # 학습용데이터로 rmse 오차를 구한다
         train_predict = sess.run(hypothesis, feed_dict={X: trainX})
         train_error = sess.run(rmse, feed_dict={targets: trainY, predictions: train_predict})
         train_error_summary.append(train_error)
 
-        # 테스트용데이터로 rmse오차를 구한다
+        # 테스트용데이터로 rmse 오차를 구한다
         test_predict = sess.run(hypothesis, feed_dict={X: testX})
         test_error = sess.run(rmse, feed_dict={targets: testY, predictions: test_predict})
         test_error_summary.append(test_error)
@@ -236,7 +240,7 @@ plt.xlabel('Time Period')
 plt.ylabel('Stock Price')
 plt.show()
 
-# sequence length만큼의 가장 최근 데이터를 슬라이싱한다
+# sequence length 만큼의 가장 최근 데이터를 슬라이싱한다
 recent_data = np.array([x[len(x) - seq_length:]])
 print("recent_data.shape:", recent_data.shape)
 print("recent_data:", recent_data)
