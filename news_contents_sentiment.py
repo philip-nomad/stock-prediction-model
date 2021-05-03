@@ -67,6 +67,7 @@ def text_processing(company_code):
         negative_list.append(negative)
         neutral_list.append(neutral)
         positive_list.append(positive)
+
         score_word_list.append(score_word)
 
     score_columns = ['negative', 'neutral', 'positive']
@@ -102,7 +103,7 @@ def text_processing(company_code):
     rt = math.trunc(rt / 4)
     if rt < -10:
         rt = -10
-    portion.append(rt * 0.1)
+    portion.append(rt * 0.1 * -1)
 
     rate_df["ratio"] = ratio
     rate_df["portion"] = portion

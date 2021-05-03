@@ -12,7 +12,7 @@ company_code_list = ['005930', '000660', '035420', '035720','005380','003550','0
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # start crawling
-    #crawler.start(company_code_list)
+    crawler.start(company_code_list)
     for company_code in company_code_list:
         preprocess.start(company_code)
         sentiment.text_processing(company_code)
