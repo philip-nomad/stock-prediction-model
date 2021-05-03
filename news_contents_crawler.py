@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime
+from datetime import date
 
 import pandas as pd
 import requests
@@ -35,10 +36,11 @@ def crawl(company_code):
         dates = [date.get_text() for date in html.select('.date')]
         for date in dates:
             date_compare = datetime.strptime(date, ' %Y.%m.%d %H:%M').date()
-            if current_date == date_compare:
+            delta = current_date - date_compare
+            if delta.days <= 4:
                 is_able_to_crawl = True
                 is_able.append(True)
-                date_res.append(current_date)
+                date_res.append(date_compare)
             else:
                 is_able.append(False)
 
