@@ -37,7 +37,7 @@ def crawl(company_code):
         for date in dates:
             date_compare = datetime.strptime(date, ' %Y.%m.%d %H:%M').date()
             delta = current_date - date_compare
-            if delta.days <= 4:
+            if delta.days <= 5:
                 is_able_to_crawl = True
                 is_able.append(True)
                 date_res.append(date_compare)
