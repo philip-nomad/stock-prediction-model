@@ -53,7 +53,7 @@ def windowed_dataset(series, window_size, batch_size, shuffle):
     return ds.batch(batch_size).prefetch(1)
 
 
-WINDOW_SIZE = 1
+WINDOW_SIZE = 5
 BATCH_SIZE = 32
 # trian_data는 학습용 데이터셋, test_data는 검증용 데이터셋 입니다.
 train_data = windowed_dataset(y_train, WINDOW_SIZE, BATCH_SIZE, True)
