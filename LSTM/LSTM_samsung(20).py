@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 STOCK_CODE = '005930'
-stock = fdr.DataReader(STOCK_CODE)
+stock = fdr.DataReader(STOCK_CODE,'2020-05-03','2021-05-03')
 
 stock_file_name = '005930.KS.csv'
 encoding = 'euc-kr'  # 문자 인코딩
@@ -53,7 +53,7 @@ def windowed_dataset(series, window_size, batch_size, shuffle):
     return ds.batch(batch_size).prefetch(1)
 
 
-WINDOW_SIZE = 20
+WINDOW_SIZE = 1
 BATCH_SIZE = 32
 # trian_data는 학습용 데이터셋, test_data는 검증용 데이터셋 입니다.
 train_data = windowed_dataset(y_train, WINDOW_SIZE, BATCH_SIZE, True)
@@ -116,6 +116,7 @@ def reverse_min_max_scaling(org_x, x): #종가 예측값
     x_np = np.asarray(x)
     return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
 
+print(ori_price)
 pred = reverse_min_max_scaling(ori_price,pred) #역정규화
 print(pred)
 print(pred[0])
