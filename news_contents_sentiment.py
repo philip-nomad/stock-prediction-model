@@ -1,5 +1,5 @@
 import csv
-
+import math
 import pandas as pd
 
 table = dict()
@@ -41,17 +41,25 @@ def text_processing(company_code):
     neutral_list = []
     positive_list = []
 
+    score_word_list = []
+
+    neg_sum = 0
+    neu_sum = 0
+    pos_sum = 0
+
     news_list = get_news_list_by_company_code(company_code)
     for news in news_list:
         word_list = news.split()
         negative = 0
         neutral = 0
         positive = 0
+        score_word = ""
         for word in word_list:
             if word in stop_words:
                 continue
 
             if word in table:
+                score_word += word + " "
                 negative += float(table[word]['Neg'])
                 neutral += float(table[word]['Neut'])
                 positive += float(table[word]['Pos'])
@@ -60,11 +68,57 @@ def text_processing(company_code):
         neutral_list.append(neutral)
         positive_list.append(positive)
 
-    columns = ['negative', 'neutral', 'positive']
-    df = pd.DataFrame(columns=columns)
-    df['negative'] = negative_list
-    df['neutral'] = neutral_list
-    df['positive'] = positive_list
+        score_word_list.append(score_word)
 
-    df.to_csv("./score/" + company_code + '.csv', index=False)
+    score_columns = ['negative', 'neutral', 'positive']
+    score_df = pd.DataFrame(columns=score_columns)
+
+    rate_columns = ['ratio','portion']
+    rate_df = pd.DataFrame(columns=rate_columns)
+
+    score_word_colums = ['words']
+    score_word_df = pd.DataFrame(columns=score_word_colums)
+
+    ratio = []
+    portion = []
+    rt = 0
+
+    for neg in negative_list:
+        neg_sum += neg
+    for neu in neutral_list:
+        neu_sum += neu
+    for pos in positive_list:
+        pos_sum += pos
+
+    negative_list.append(neg_sum)
+    neutral_list.append(neu_sum)
+    positive_list.append(pos_sum)
+
+    if pos_sum != 0:
+        rt = (neg_sum / pos_sum - 0.6) * 100
+        ratio.append(neg_sum/pos_sum)
+    else:
+        ratio.append(0)
+
+    rt = math.trunc(rt / 4)
+    if rt < -10:
+        rt = -10
+    portion.append(rt * 0.1 * -1)
+
+    rate_df["ratio"] = ratio
+    rate_df["portion"] = portion
+
+    score_df['negative'] = negative_list
+    score_df['neutral'] = neutral_list
+    score_df['positive'] = positive_list
+
+    score_word_df['words'] = score_word_list
+
+    score_df.to_csv("./score/" + company_code + '.csv', index=False)
     pd.read_csv("./score/" + company_code + '.csv')
+
+    rate_df.to_csv("./rate/"+company_code+'.csv',index=False)
+    pd.read_csv("./rate/"+company_code+'.csv')
+
+    score_word_df.to_csv("./score_word/"+company_code+'.csv',index=False)
+    pd.read_csv("./score_word/"+company_code+'.csv')

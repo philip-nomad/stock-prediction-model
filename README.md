@@ -18,6 +18,13 @@
 - 감성 분석 변경(불필요한 단어 제거 코드 부분 삭제)
 - 모든 .csv파일 각 디렉토리에 저장하도록 변경
 
+#### 2021.5.3
+
+- 뉴스 점수 내는 부분에서 ratio, 점수에 산출하는 단어 리스트 따로 csv로 저장
+- 산출방식을 기존의 수식에서 (부정 총점수) / (긍정 총점수) 로 수정
+- 기준은 0.6으로 선정(이상은 부정, 아래는 긍정)
+- 20단계로 나누어서 가중치 산정
+
 ### How (crawling)
 
 ```python
@@ -73,4 +80,4 @@ def text_processing(code)
   - 회사 이름 - 종목 코드
 - 불용어.txt
 - polarity.csv
-- news, score, words 디렉토리
+- news, score, words, score_words, ratio 디렉토리

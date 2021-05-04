@@ -43,7 +43,7 @@ def start(company_code):
     f.close()
     columns = ['time', 'title', 'context']
     df = pd.DataFrame(columns=columns)
-    df["date"] = date_results
+    df["time"] = date_results
     df["title"] = input_titles
     df["context"] = input_contexts
     df.to_csv("./words/" + company_code + '.csv', index=False)
