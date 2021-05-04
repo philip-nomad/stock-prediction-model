@@ -14,7 +14,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
 STOCK_CODE = '005930'
-stock = fdr.DataReader(STOCK_CODE, '2020-05-03', '2021-05-03')
+stock = fdr.DataReader(STOCK_CODE,'2020-05-04','2021-05-03')
+
 
 stock_file_name = '005930.KS.csv'
 encoding = 'euc-kr'  # 문자 인코딩
@@ -26,10 +27,7 @@ stock_info = raw_dataframe.values[1:].astype(np.float)  # 금액&거래량 문�
 print("stock_info.shape: ", stock_info.shape)
 print("stock_info[0]: ", stock_info[0])
 ori_price = stock_info[:, :-1]
-
-# stock['Year'] = stock.index.year
-# stock['Month'] = stock.index.month
-# stock['Day'] = stock.index.day
+ori_close_price=ori_price[:, 3]
 
 
 scaler = MinMaxScaler()
@@ -115,8 +113,13 @@ def reverse_min_max_scaling(org_x, x):  # 종가 예측값
 
     return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
 
+#plt.figure(figsize=(12, 9))
+#plt.plot(np.asarray(y_test)[5:], label='actual')
+#plt.plot(pred, label='prediction')
+#plt.legend()
+#plt.show()
 
-print(ori_price)
-pred = reverse_min_max_scaling(ori_price, pred)  # 역정규화
+print(ori_close_price)
+pred = reverse_min_max_scaling(ori_close_price,pred) #역정규화
 print(pred)
 print(pred[0])
