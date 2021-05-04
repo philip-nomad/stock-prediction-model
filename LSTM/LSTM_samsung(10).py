@@ -22,7 +22,7 @@ ori_price = stock_info[:, :-1]
 #print(ori_price)
 #print(ori_price[:,3])
 ori_close_price=ori_price[:, 3]
-ori_close_finalday_price=ori_close_price
+ori_close_finalday_price=ori_close_price[-1]
 
 #stock['Year'] = stock.index.year
 #stock['Month'] = stock.index.month

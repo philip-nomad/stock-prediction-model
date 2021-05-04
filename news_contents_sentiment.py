@@ -95,15 +95,14 @@ def text_processing(company_code):
     positive_list.append(pos_sum)
 
     if pos_sum != 0:
-        rt = (neg_sum / pos_sum - 0.6) * 100
-        ratio.append(neg_sum/pos_sum)
+        rt = (pos_sum) / (neg_sum + pos_sum)
+        ratio.append(rt)
     else:
         ratio.append(0)
 
-    rt = math.trunc(rt / 4)
-    if rt < -10:
-        rt = -10
-    portion.append(rt * 0.1 * -1)
+
+    print(f"rt: {rt / 0.53 - 1}")
+    portion.append(rt / 0.53 - 1)
 
     rate_df["ratio"] = ratio
     rate_df["portion"] = portion
