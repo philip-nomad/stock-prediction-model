@@ -20,7 +20,8 @@ if not os.path.exists('words'):
 
 
 def crawl(company_code):
-    page = 1
+    page_index = 0
+    page = 5
     title_result = []
     content_result = []
     date_res = []
@@ -37,7 +38,7 @@ def crawl(company_code):
         for date in dates:
             date_compare = datetime.strptime(date, ' %Y.%m.%d %H:%M').date()
             delta = current_date - date_compare
-            if delta.days <= 5:
+            if delta.days >= 2 and delta.days <= 3:
                 is_able_to_crawl = True
                 is_able.append(True)
                 date_res.append(date_compare)
@@ -75,8 +76,9 @@ def crawl(company_code):
             a = text.find("<a")
             text = remove_filename(text[0:a])
             content_result.append(text)
-
+        page_index += 1
         page += 1
+        print(f"크롤링 페이지: {page_index}")
 
     result = {"날짜": date_res, "기사제목": title_result, "본문내용": content_result}
     df_result = pd.DataFrame(result)
