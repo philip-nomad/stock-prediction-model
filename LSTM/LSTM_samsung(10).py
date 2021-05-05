@@ -1,6 +1,6 @@
 import os
 
-import FinanceDataReader as fdr
+import FinanceDataReader
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -13,7 +13,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
 STOCK_CODE = '005930'
-stock = fdr.DataReader(STOCK_CODE, '2019-05-03', '2021-05-03')
+stock = FinanceDataReader.DataReader(STOCK_CODE, '2019-05-03', '2021-05-03')
 
 stock_file_name = '005930.KS2.csv'
 encoding = 'euc-kr'  # 문자 인코딩

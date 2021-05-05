@@ -1,6 +1,6 @@
 import os
 
-import FinanceDataReader as fdr
+import FinanceDataReader
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -13,7 +13,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
 STOCK_CODE = '005930'
-stock = fdr.DataReader(STOCK_CODE, '2020-05-04', '2021-05-02')
+stock = FinanceDataReader.DataReader(STOCK_CODE, '2020-05-04', '2021-05-02')
 
 
 def lstm_samsung():
@@ -77,7 +77,7 @@ def lstm_samsung():
     ])
 
     # Sequence 학습에 비교적 좋은 퍼포먼스를 내는 Huber()를 사용합니다.
-    loss = Huber()
+    Huber()
     optimizer = Adam(0.0005)
     model.compile(loss=Huber(), optimizer=optimizer, metrics=['mse'])
 
@@ -91,10 +91,10 @@ def lstm_samsung():
                                  monitor='val_loss',
                                  verbose=1)
 
-    history = model.fit(train_data,
-                        validation_data=(test_data),
-                        epochs=50,
-                        callbacks=[checkpoint])
+    model.fit(train_data,
+              validation_data=(test_data),
+              epochs=50,
+              callbacks=[checkpoint])
 
     model.load_weights(filename)
     pred = model.predict(test_data)

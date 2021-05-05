@@ -95,7 +95,7 @@ def text_processing(company_code):
     positive_list.append(pos_sum)
 
     if pos_sum != 0:
-        rt = (pos_sum) / (neg_sum + pos_sum)
+        rt = pos_sum / (neg_sum + pos_sum)
         ratio.append(rt)
     else:
         ratio.append(0)
