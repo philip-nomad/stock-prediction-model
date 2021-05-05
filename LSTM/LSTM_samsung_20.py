@@ -1,7 +1,6 @@
 import os
 
 import FinanceDataReader as fdr
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -14,10 +13,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
 STOCK_CODE = '005930'
-stock = fdr.DataReader(STOCK_CODE,'2020-05-04','2021-05-02')
+stock = fdr.DataReader(STOCK_CODE, '2020-05-04', '2021-05-02')
+
 
 def lstm_samsung():
-
     stock_file_name = './LSTM/005930.KS.csv'
     encoding = 'euc-kr'  # 문자 인코딩
     names = ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
@@ -25,11 +24,10 @@ def lstm_samsung():
     raw_dataframe.info()  # 데이터 정보 출력
     del raw_dataframe['Date']  # 위 줄과 같은 효과
     stock_info = raw_dataframe.values[1:].astype(np.float)  # 금액&거래량 문자열을 부동소수점형으로 변환한다
-    #print("stock_info.shape: ", stock_info.shape)
-    #print("stock_info[0]: ", stock_info[0])
+    # print("stock_info.shape: ", stock_info.shape)
+    # print("stock_info[0]: ", stock_info[0])
     ori_price = stock_info[:, :-1]
-    ori_close_price=ori_price[:, 3]
-
+    ori_close_price = ori_price[:, 3]
 
     scaler = MinMaxScaler()
     scale_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
@@ -42,7 +40,6 @@ def lstm_samsung():
                                                         random_state=0,
                                                         shuffle=False)
 
-
     def windowed_dataset(series, window_size, batch_size, shuffle):
         series = tf.expand_dims(series, axis=-1)
         ds = tf.data.Dataset.from_tensor_slices(series)
@@ -53,7 +50,6 @@ def lstm_samsung():
         ds = ds.map(lambda w: (w[:-1], w[-1]))
 
         return ds.batch(batch_size).prefetch(1)
-
 
     WINDOW_SIZE = 5
     BATCH_SIZE = 32
@@ -110,14 +106,14 @@ def lstm_samsung():
 
         return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
 
-    #plt.figure(figsize=(12, 9))
-    #plt.plot(np.asarray(y_test)[5:], label='actual')
-    #plt.plot(pred, label='prediction')
-    #plt.legend()
-    #plt.show()
+    # plt.figure(figsize=(12, 9))
+    # plt.plot(np.asarray(y_test)[5:], label='actual')
+    # plt.plot(pred, label='prediction')
+    # plt.legend()
+    # plt.show()
 
-    pred = reverse_min_max_scaling(ori_close_price,pred) #역정규화
+    pred = reverse_min_max_scaling(ori_close_price, pred)  # 역정규화
     pred[0]
     ori_close_price = ori_price[:, 3]
     ori_close_finalday_price = ori_close_price[-1]
-    return [pred[0],81500]
+    return [pred[0], 81500]

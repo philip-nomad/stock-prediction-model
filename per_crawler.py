@@ -1,5 +1,4 @@
 import os
-import re
 
 import pandas as pd
 import requests
@@ -30,6 +29,7 @@ def crawler(company_code):
     result = {"company_name": [company_name], "company_code": [company_code], "PER": [per], "동일업종 PER": [category_per]}
     df_result = pd.DataFrame(result)
     df_result.to_csv('per_data/' + company_code + '.csv', mode='w', encoding='utf-8-sig')
+
 
 def start(company_code_list):
     for company_code in company_code_list:

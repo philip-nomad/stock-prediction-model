@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime
-from datetime import date
 
 import pandas as pd
 import requests

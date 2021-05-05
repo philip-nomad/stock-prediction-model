@@ -1,13 +1,19 @@
 import os
 
 import FinanceDataReader as fdr
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.layers import Dense, LSTM, Conv1D
+from tensorflow.keras.losses import Huber
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
 
 STOCK_CODE = '005930'
-stock = fdr.DataReader(STOCK_CODE,'2019-05-03','2021-05-03')
-
+stock = fdr.DataReader(STOCK_CODE, '2019-05-03', '2021-05-03')
 
 stock_file_name = '005930.KS2.csv'
 encoding = 'euc-kr'  # 문자 인코딩
@@ -19,30 +25,23 @@ stock_info = raw_dataframe.values[1:].astype(np.float)  # 금액&거래량 문�
 print("stock_info.shape: ", stock_info.shape)
 print("stock_info[0]: ", stock_info[0])
 ori_price = stock_info[:, :-1]
-#print(ori_price)
-#print(ori_price[:,3])
-ori_close_price=ori_price[:, 3]
-ori_close_finalday_price=ori_close_price[-1]
+# print(ori_price)
+# print(ori_price[:,3])
+ori_close_price = ori_price[:, 3]
+ori_close_finalday_price = ori_close_price[-1]
 
-#stock['Year'] = stock.index.year
-#stock['Month'] = stock.index.month
-#stock['Day'] = stock.index.day
+# stock['Year'] = stock.index.year
+# stock['Month'] = stock.index.month
+# stock['Day'] = stock.index.day
 
-from sklearn.preprocessing import MinMaxScaler
 
 scaler = MinMaxScaler()
 scale_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
 scaled = scaler.fit_transform(stock[scale_cols])
 df = pd.DataFrame(scaled, columns=scale_cols)
 
-from sklearn.model_selection import train_test_split
-
 x_train, x_test, y_train, y_test = train_test_split(df.drop('Close', 1), df['Close'], test_size=0.2, random_state=0,
                                                     shuffle=False)
-
-
-
-import tensorflow as tf
 
 
 def windowed_dataset(series, window_size, batch_size, shuffle):
@@ -68,12 +67,6 @@ test_data = windowed_dataset(y_test, WINDOW_SIZE, BATCH_SIZE, False)
 for data in train_data.take(1):
     print(f'데이터셋(X) 구성(batch_size, window_size, feature갯수): {data[0].shape}')
     print(f'데이터셋(Y) 구성(batch_size, window_size, feature갯수): {data[1].shape}')
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, Conv1D
-from tensorflow.keras.losses import Huber
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import ModelCheckpoint
 
 model = Sequential([
     # 1차원 feature map 생성
@@ -113,19 +106,21 @@ print(pred.shape)
 print(pred[0])
 print(pred[1])
 
-#역정규화 : 정규화된 값을 원래의 값으로 되돌림
-def reverse_min_max_scaling(org_x, x): #종가 예측값
+
+# 역정규화 : 정규화된 값을 원래의 값으로 되돌림
+def reverse_min_max_scaling(org_x, x):  # 종가 예측값
     org_x_np = np.asarray(org_x)
     x_np = np.asarray(x)
     return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
 
-#plt.figure(figsize=(12, 9))
-#plt.plot(np.asarray(y_test)[5:], label='actual')
-#plt.plot(pred, label='prediction')
-#plt.legend()
-#plt.show()
+
+# plt.figure(figsize=(12, 9))
+# plt.plot(np.asarray(y_test)[5:], label='actual')
+# plt.plot(pred, label='prediction')
+# plt.legend()
+# plt.show()
 
 print(ori_price)
-pred = reverse_min_max_scaling(ori_close_price,pred) #역정규화
+pred = reverse_min_max_scaling(ori_close_price, pred)  # 역정규화
 print(pred)
 print(pred[0])

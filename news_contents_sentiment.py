@@ -1,5 +1,5 @@
 import csv
-import math
+
 import pandas as pd
 
 table = dict()
@@ -73,7 +73,7 @@ def text_processing(company_code):
     score_columns = ['negative', 'neutral', 'positive']
     score_df = pd.DataFrame(columns=score_columns)
 
-    rate_columns = ['ratio','portion']
+    rate_columns = ['ratio', 'portion']
     rate_df = pd.DataFrame(columns=rate_columns)
 
     score_word_colums = ['words']
@@ -100,7 +100,6 @@ def text_processing(company_code):
     else:
         ratio.append(0)
 
-
     print(f"rt: {rt / 0.53 - 1}")
     portion.append(rt / 0.53 - 1)
 
@@ -116,8 +115,8 @@ def text_processing(company_code):
     score_df.to_csv("./score/" + company_code + '.csv', index=False)
     pd.read_csv("./score/" + company_code + '.csv')
 
-    rate_df.to_csv("./rate/"+company_code+'.csv',index=False)
-    pd.read_csv("./rate/"+company_code+'.csv')
+    rate_df.to_csv("./rate/" + company_code + '.csv', index=False)
+    pd.read_csv("./rate/" + company_code + '.csv')
 
-    score_word_df.to_csv("./score_word/"+company_code+'.csv',index=False)
-    pd.read_csv("./score_word/"+company_code+'.csv')
+    score_word_df.to_csv("./score_word/" + company_code + '.csv', index=False)
+    pd.read_csv("./score_word/" + company_code + '.csv')
