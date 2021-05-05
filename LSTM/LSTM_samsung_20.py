@@ -81,8 +81,8 @@ def lstm_samsung():
     optimizer = Adam(0.0005)
     model.compile(loss=Huber(), optimizer=optimizer, metrics=['mse'])
 
-    # earlystopping 은 10번 epoch 동안 val_loss 개선이 없다면 학습을 멈춥니다.
-    # earlystopping = EarlyStopping(monitor='val_loss', patience=10)
+    # early_stopping 은 10번 epoch 동안 val_loss 개선이 없다면 학습을 멈춥니다.
+    # early_stopping = EarlyStopping(monitor='val_loss', patience=10)
     # val_loss 기준 체크포인터도 생성합니다.
     filename = os.path.join('tmp', 'ckeckpointer.ckpt')
     checkpoint = ModelCheckpoint(filename,

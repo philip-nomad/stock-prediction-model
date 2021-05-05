@@ -76,8 +76,8 @@ def text_processing(company_code):
     rate_columns = ['ratio', 'portion']
     rate_df = pd.DataFrame(columns=rate_columns)
 
-    score_word_colums = ['words']
-    score_word_df = pd.DataFrame(columns=score_word_colums)
+    score_word_columns = ['words']
+    score_word_df = pd.DataFrame(columns=score_word_columns)
 
     ratio = []
     portion = []

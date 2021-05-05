@@ -29,7 +29,7 @@ def prediction(lstm, company_code):
             per_predict.append(per[4])
 
     per = (1 - float(per_predict[0]) / float(per_predict[1]))
-    print(f"PER을 이용한 예측 점수:{per}")
+    print(f"PER 을 이용한 예측 점수:{per}")
     print(f"감성 분석을 이용한 예측 점수: {emotion_predict}")
     print(f"LSTM 예측 변동률: {lstm}")
     return 0.3 * float(emotion_predict[-1]) + 0.6 * lstm + per * 0.1

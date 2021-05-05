@@ -28,7 +28,7 @@ ori_price = stock_info[:, :-1]
 # print(ori_price)
 # print(ori_price[:,3])
 ori_close_price = ori_price[:, 3]
-ori_close_finalday_price = ori_close_price[-1]
+ori_close_final_day_price = ori_close_price[-1]
 
 # stock['Year'] = stock.index.year
 # stock['Month'] = stock.index.month
@@ -57,7 +57,7 @@ def windowed_dataset(series, window_size, batch_size, shuffle):
 
 WINDOW_SIZE = 10
 BATCH_SIZE = 32
-# trian_data는 학습용 데이터셋, test_data는 검증용 데이터셋 입니다.
+# train_data 는 학습용 데이터셋, test_data 는 검증용 데이터셋 입니다.
 train_data = windowed_dataset(y_train, WINDOW_SIZE, BATCH_SIZE, True)
 test_data = windowed_dataset(y_test, WINDOW_SIZE, BATCH_SIZE, False)
 
@@ -85,8 +85,8 @@ loss = Huber()
 optimizer = Adam(0.0005)
 model.compile(loss=Huber(), optimizer=optimizer, metrics=['mse'])
 
-# earlystopping은 10번 epoch통안 val_loss 개선이 없다면 학습을 멈춥니다.
-# earlystopping = EarlyStopping(monitor='val_loss', patience=10)
+# early_stopping 은 10번 epoch 동안 val_loss 개선이 없다면 학습을 멈춥니다.
+# early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 # val_loss 기준 체크포인터도 생성합니다.
 filename = os.path.join('tmp', 'ckeckpointer.ckpt')
 checkpoint = ModelCheckpoint(filename,
