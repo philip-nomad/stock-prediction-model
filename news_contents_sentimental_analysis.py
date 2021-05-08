@@ -28,7 +28,7 @@ def get_news_list_by_company_code(company_code):
     return news_list
 
 
-def text_processing(company_code):
+def analyze(company_code):
     f = open("./score/" + company_code + '.csv', "w+")
     f.close()
 
@@ -79,9 +79,9 @@ def text_processing(company_code):
     score_word_columns = ['words']
     score_word_df = pd.DataFrame(columns=score_word_columns)
 
-    ratio = []
-    portion = []
-    rt = 0
+    ratio_list = []
+    portion_list = []
+    ratio = 0
 
     for neg in negative_list:
         neg_sum += neg
@@ -95,16 +95,16 @@ def text_processing(company_code):
     positive_list.append(pos_sum)
 
     if pos_sum != 0:
-        rt = pos_sum / (neg_sum + pos_sum)
-        ratio.append(rt)
+        ratio = pos_sum / (neg_sum + pos_sum)
+        ratio_list.append(ratio)
     else:
-        ratio.append(0)
+        ratio_list.append(0)
 
-    print(f"rt: {rt / 0.53 - 1}")
-    portion.append(rt / 0.53 - 1)
+    print(f"rt: {ratio / 0.53 - 1}")
+    portion_list.append(ratio / 0.53 - 1)
 
-    rate_df["ratio"] = ratio
-    rate_df["portion"] = portion
+    rate_df["ratio"] = ratio_list
+    rate_df["portion"] = portion_list
 
     score_df['negative'] = negative_list
     score_df['neutral'] = neutral_list

@@ -18,7 +18,7 @@ stock = FinanceDataReader.DataReader(STOCK_CODE, '2019-05-03', '2021-05-03')
 stock_file_name = '005930.KS2.csv'
 encoding = 'euc-kr'  # 문자 인코딩
 names = ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
-raw_dataframe = pd.read_csv(stock_file_name, names=names, encoding=encoding)  # 판다스이용 csv파일 로딩
+raw_dataframe = pd.read_csv(stock_file_name, names=names, encoding=encoding)  # 판다스이용 csv 파일 로딩
 raw_dataframe.info()  # 데이터 정보 출력
 del raw_dataframe['Date']  # 위 줄과 같은 효과
 stock_info = raw_dataframe.values[1:].astype(np.float)  # 금액&거래량 문자열을 부동소수점형으로 변환한다

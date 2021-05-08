@@ -18,7 +18,7 @@ if not os.path.exists('words'):
     os.makedirs('words')
 
 
-def crawl(company_code):
+def start(company_code):
     page_index = 0
     page = 5
     title_result = []
@@ -108,8 +108,3 @@ def remove_filename(content):
     cleaned_text = cleaned_text.strip()
 
     return cleaned_text
-
-
-def start(company_code_list):
-    for company_code in company_code_list:
-        crawl(company_code)
