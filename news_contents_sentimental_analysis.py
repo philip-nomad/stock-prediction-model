@@ -1,5 +1,5 @@
 import csv
-import math
+
 import pandas as pd
 
 table = dict()
@@ -28,7 +28,7 @@ def get_news_list_by_company_code(company_code):
     return news_list
 
 
-def text_processing(company_code):
+def analyze(company_code):
     f = open("./score/" + company_code + '.csv', "w+")
     f.close()
 
@@ -73,15 +73,15 @@ def text_processing(company_code):
     score_columns = ['negative', 'neutral', 'positive']
     score_df = pd.DataFrame(columns=score_columns)
 
-    rate_columns = ['ratio','portion']
+    rate_columns = ['ratio', 'portion']
     rate_df = pd.DataFrame(columns=rate_columns)
 
-    score_word_colums = ['words']
-    score_word_df = pd.DataFrame(columns=score_word_colums)
+    score_word_columns = ['words']
+    score_word_df = pd.DataFrame(columns=score_word_columns)
 
-    ratio = []
-    portion = []
-    rt = 0
+    ratio_list = []
+    portion_list = []
+    ratio = 0
 
     for neg in negative_list:
         neg_sum += neg
@@ -95,17 +95,16 @@ def text_processing(company_code):
     positive_list.append(pos_sum)
 
     if pos_sum != 0:
-        rt = (pos_sum) / (neg_sum + pos_sum)
-        ratio.append(rt)
+        ratio = pos_sum / (neg_sum + pos_sum)
+        ratio_list.append(ratio)
     else:
-        ratio.append(0)
+        ratio_list.append(0)
 
+    print(f"rt: {ratio / 0.53 - 1}")
+    portion_list.append(ratio / 0.53 - 1)
 
-    print(f"rt: {rt / 0.53 - 1}")
-    portion.append(rt / 0.53 - 1)
-
-    rate_df["ratio"] = ratio
-    rate_df["portion"] = portion
+    rate_df["ratio"] = ratio_list
+    rate_df["portion"] = portion_list
 
     score_df['negative'] = negative_list
     score_df['neutral'] = neutral_list
@@ -116,8 +115,8 @@ def text_processing(company_code):
     score_df.to_csv("./score/" + company_code + '.csv', index=False)
     pd.read_csv("./score/" + company_code + '.csv')
 
-    rate_df.to_csv("./rate/"+company_code+'.csv',index=False)
-    pd.read_csv("./rate/"+company_code+'.csv')
+    rate_df.to_csv("./rate/" + company_code + '.csv', index=False)
+    pd.read_csv("./rate/" + company_code + '.csv')
 
-    score_word_df.to_csv("./score_word/"+company_code+'.csv',index=False)
-    pd.read_csv("./score_word/"+company_code+'.csv')
+    score_word_df.to_csv("./score_word/" + company_code + '.csv', index=False)
+    pd.read_csv("./score_word/" + company_code + '.csv')

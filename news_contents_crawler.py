@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime
-from datetime import date
 
 import pandas as pd
 import requests
@@ -19,7 +18,7 @@ if not os.path.exists('words'):
     os.makedirs('words')
 
 
-def crawl(company_code):
+def start(company_code):
     page_index = 0
     page = 5
     title_result = []
@@ -38,7 +37,7 @@ def crawl(company_code):
         for date in dates:
             date_compare = datetime.strptime(date, ' %Y.%m.%d %H:%M').date()
             delta = current_date - date_compare
-            if delta.days >= 2 and delta.days <= 3:
+            if 2 <= delta.days <= 3:
                 is_able_to_crawl = True
                 is_able.append(True)
                 date_res.append(date_compare)
@@ -100,7 +99,7 @@ def remove_filename(content):
     # 영문제거
     cleaned_text = re.sub('[a-zA-Z]', ' ', content)
     # 이메일 제거
-    cleaned_text = re.sub('[-=+,#/?:^$.@*\"※~&%ㆍ!』‘|()\[\]<>`\'…》]', ' ', cleaned_text)
+    cleaned_text = re.sub('[-=+,#/?:^$.@*\"※~&%ㆍ!』‘|()[]<>`\'…》]', ' ', cleaned_text)
     # 한글 아닌거 제거
     cleaned_text = re.sub(r'[^ㄱ-ㅣ가-힣]', ' ', cleaned_text)
     # 공백 2칸 이상을 1칸으로 수정
@@ -109,8 +108,3 @@ def remove_filename(content):
     cleaned_text = cleaned_text.strip()
 
     return cleaned_text
-
-
-def start(company_code_list):
-    for company_code in company_code_list:
-        crawl(company_code)
