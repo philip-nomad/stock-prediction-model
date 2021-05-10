@@ -7,9 +7,9 @@ import make_criteria
 #네이버:035420
 #하이닉스:000660
 #셀트리온:068270
-company_code = '068270'
-days = 17
-wherep = 5
+company_code = '000660'
+days = 0
+wherep = 1
 news_crawler_criteria.start(company_code,days,wherep)
 preprocessor_criteria.start(company_code)
 sentimental_analysis_criteria.analyze(company_code)
