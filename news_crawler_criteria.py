@@ -18,9 +18,9 @@ if not os.path.exists('criteria_words'):
     os.makedirs('criteria_words')
 
 
-def start(company_code,days,wherep):
+def start(company_code, days, wherep):
     page_index = 0
-    page = wherep #기사 있는 페이지
+    page = wherep  # 기사 있는 페이지
     title_result = []
     content_result = []
     date_res = []
@@ -37,7 +37,7 @@ def start(company_code,days,wherep):
         for date in dates:
             date_compare = datetime.strptime(date, ' %Y.%m.%d %H:%M').date()
             delta = current_date - date_compare
-            if delta.days == days:    #몇 일 전꺼 가져오냐
+            if delta.days == days:  # 며칠 전꺼 가져오냐
                 is_able_to_crawl = True
                 is_able.append(True)
                 date_res.append(date_compare)

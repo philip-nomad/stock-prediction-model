@@ -1,8 +1,9 @@
-import pandas as pd
 from datetime import datetime, timedelta
 
+import pandas as pd
 
-def get_criteria(company_code,days):
+
+def get_criteria(company_code, days):
     df = pd.read_csv("./criteria_rate" + "\\" + company_code + '.csv')
     get_score = df.iloc[-1]
     df_news_cnt = pd.read_csv("./criteria_news" + "\\" + company_code + '.csv')
