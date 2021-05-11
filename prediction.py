@@ -29,7 +29,7 @@ def predict(company_code):
             company_per = float(line[3])
             same_category_per = float(line[4])
 
-    if company_per >= 0 and same_category_per >= 0:
+    if company_per >= 0 and same_category_per > 0:
         per_value = 1 - company_per / same_category_per  # 1 - 자기 회사 PER / 동일 업종 PER
     else:
         per_value = 0
