@@ -20,15 +20,20 @@ def predict(company_code):
             emotional_analysis_values.append(rate[1])
     print(f"감성 분석을 이용한 예측 점수: {emotional_analysis_values}")
 
-    per_values = []
+    company_per = 0
+    same_category_per = 0
     with open('./per_data/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
         next(lines)
 
         for line in csv.reader(lines):
-            per_values.append(line[3])
-            per_values.append(line[4])
+            company_per = float(line[3])
+            same_category_per = float(line[4])
 
-    per_value = (1 - float(per_values[0]) / float(per_values[1]))
+    if company_per >= 0 and same_category_per > 0:
+        per_value = 1 - company_per / same_category_per  # 1 - 자기 회사 PER / 동일 업종 PER
+    else:
+        per_value = 0
+
     print(f"PER 을 이용한 예측 점수:{per_value}")
 
     predicted_value = 100 * (lstm_value * WEIGHT_FOR_LSTM_VALUE +
