@@ -75,19 +75,11 @@ def get_lstm_score(comp_code, start_date, end_date):
     # early_stopping 은 10번 epoch 동안 val_loss 개선이 없다면 학습을 멈춥니다.
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10)
     # val_loss 기준 체크포인터도 생성합니다.
-    filename = os.path.join('tmp', 'ckeckpointer.ckpt')
-    checkpoint = ModelCheckpoint(filename,
-                                 save_weights_only=True,
-                                 save_best_only=True,
-                                 monitor='val_loss',
-                                 verbose=1)
+
 
     model.fit(train_data,
               validation_data=(test_data),
-              epochs=50,
-              callbacks=[checkpoint])
-
-    model.load_weights(filename)
+              epochs=50,)
     pred = model.predict(test_data)
 
     # 역정규화 : 정규화된 값을 원래의 값으로 되돌림
