@@ -1,6 +1,6 @@
+import datetime
 import os
 import re
-from datetime import datetime
 
 import pandas as pd
 import requests
@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 
 PATH = "./"
 os.chdir(PATH)
-if not os.path.exists('news'):
-    os.makedirs('news')
+if not os.path.exists('date_news'):
+    os.makedirs('date_news')
 
 if not os.path.exists('score'):
     os.makedirs('score')
@@ -18,71 +18,73 @@ if not os.path.exists('words'):
     os.makedirs('words')
 
 
-def start(company_code):
-    page_index = 0
-    page = 5
-    title_result = []
-    content_result = []
-    date_res = []
+def start(company_code, target_date):
+    if not os.path.exists("./date_news/" + company_code):
+        os.makedirs("./date_news/" + company_code)
+
+    unique_news_titles = set()
+    page = 1
     while True:
-        is_able_to_crawl = False
         url = 'https://finance.naver.com/item/news_news.nhn?code=' + str(company_code) + '&page=' + str(page)
+
         source_code = requests.get(url).text
         html = BeautifulSoup(source_code, "lxml")
 
-        is_able = []
-        current_date = datetime.now().date()
+        processing_date = datetime.date.today()  # 오늘 날짜부터 시작
 
-        dates = [date.get_text() for date in html.select('.date')]
-        for date in dates:
-            date_compare = datetime.strptime(date, ' %Y.%m.%d %H:%M').date()
-            delta = current_date - date_compare
-            if 2 <= delta.days <= 3:
-                is_able_to_crawl = True
-                is_able.append(True)
-                date_res.append(date_compare)
-            else:
-                is_able.append(False)
+        dates = [datetime.datetime.strptime(date.get_text(), ' %Y.%m.%d %H:%M').date() for date in html.select('.date')]
+        titles = [re.sub('\n', '', str(title.get_text())) for title in html.select('.title')]
+        links = ['https://finance.naver.com' + link.find('a')['href'] for link in html.select('.title')]
 
-        if not is_able_to_crawl:
+        flag = True
+
+        result_date = []
+        result_title = []
+        result_contents = []
+
+        for row in list(zip(dates, titles, links)):
+            date = row[0]
+            title = row[1]
+            link = row[2]
+
+            if title in unique_news_titles:
+                continue
+
+            unique_news_titles.add(title)
+
+            source_code = requests.get(link).text
+            html = BeautifulSoup(source_code, "lxml")
+            contents = str(html.select("div#news_read"))
+            contents.find("<span")
+            a = contents.find("<a")
+            contents = remove_filename(contents[0:a])
+
+            if (processing_date - date).days != 0:  # row 단위로 뉴스기사를 읽어오다가 날짜가 달라진 경우
+                result = {"날짜": result_date, "기사제목": result_title, "본문내용": result_contents}
+                df_result = pd.DataFrame(result)
+                df_result.to_csv(
+                    "./date_news/" + company_code + "/" + company_code + "_" + str(processing_date)[:10] + '.csv',
+                    mode='w',
+                    encoding='utf-8-sig'
+                )
+                processing_date = date
+                result_date.clear()
+                result_title.clear()
+                result_contents.clear()
+
+            if (processing_date - target_date).days < 0:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
+                flag = False
+                break
+
+            result_date.append(date)
+            result_title.append(title)
+            result_contents.append(contents)
+
+        if not flag:
             break
 
-        titles = html.select('.title')
-        for idx, title in enumerate(titles):
-            if not is_able[idx]:
-                continue
-            title = title.get_text()
-            title = re.sub('\n', '', title)
-            title_result.append(title)
-
-        # 뉴스 링크
-        link_result = []
-        links = html.select('.title')
-
-        for link in links:
-            add = 'https://finance.naver.com' + link.find('a')['href']
-            link_result.append(add)
-
-        for idx, link in enumerate(link_result):
-            if not is_able[idx]:
-                continue
-            url = link
-            source_code = requests.get(url).text
-            html = BeautifulSoup(source_code, "lxml")
-            contents = html.select("div#news_read")
-            text = str(contents)
-            text.find("<span")
-            a = text.find("<a")
-            text = remove_filename(text[0:a])
-            content_result.append(text)
-        page_index += 1
+        print(f"company_code: {company_code}, processing_date: {processing_date}, 크롤링 끝난 페이지: {page}")
         page += 1
-        print(f"크롤링 페이지: {page_index}")
-
-    result = {"날짜": date_res, "기사제목": title_result, "본문내용": content_result}
-    df_result = pd.DataFrame(result)
-    print(f"{company_code} 기사를 다운 받고 있습니다------")
-    df_result.to_csv("./news/" + company_code + '.csv', mode='w', encoding='utf-8-sig')
 
 
 # html 태그 제거하는 코드
