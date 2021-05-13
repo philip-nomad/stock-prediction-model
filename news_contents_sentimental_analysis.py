@@ -16,28 +16,31 @@ with open('polarity.csv', 'r', -1, 'utf-8') as polarity:
 
         table[key] = {'Neg': line[3], 'Neut': line[4], 'Pos': line[6]}
 
+
 def get_news_list_by_company_code(company_code, date):
     news_list = []
-    with open("./date_news_words/" + company_code + "/" + company_code + "_" + str(date)[:10] + '.csv', 'r', -1,
-              'utf-8') as news_data:
-        next(news_data)
+    try:
+        with open("./date_news_words/" + company_code + "/" + company_code + "_" + str(date)[:10] + '.csv', 'r', -1,
+                  'utf-8') as news_data:
+            next(news_data)
 
-        for news in csv.reader(news_data):
-            content = news[2]
-            title = news[1]
-            news_list.append(content + " " + title)
+            for news in csv.reader(news_data):
+                content = news[2]
+                title = news[1]
+                news_list.append(content + " " + title)
+    except FileNotFoundError:
+        return []
 
     return news_list
 
 
-def analyze(company_code):
+def analyze(company_code, target_date):
     file_stop_word = open('불용어.txt', 'r', -1, 'utf-8')
     stop_words = file_stop_word.read()
     stop_words = set(stop_words.split('\n'))
     file_stop_word.close()
 
     start_date = datetime.date.today()
-    target_date = datetime.date(2021, 5, 12)
 
     while True:
         negative_list = []
@@ -106,10 +109,10 @@ def analyze(company_code):
             ratio_list.append(0)
 
         if ratio != 0:
-            print(f"rt: {ratio / 0.53 - 1}")
+            print(f"ratio: {ratio / 0.53 - 1}")
             portion_list.append(ratio / 0.53 - 1)
         else:
-            portion_list.append(0)
+            portion_list.append(0)  # 전처리 후 단어가 아예 없거나
 
         rate_df["ratio"] = ratio_list
         rate_df["portion"] = portion_list
@@ -129,18 +132,24 @@ def analyze(company_code):
         if not os.path.exists("./date_news_score_words/" + company_code):
             os.makedirs("./date_news_score_words/" + company_code)
 
-        score_df.to_csv("./date_news_score/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
-                        index=False)
+        score_df.to_csv(
+            "./date_news_score/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
+            index=False
+        )
         pd.read_csv("./date_news_score/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv')
 
-        rate_df.to_csv("./date_news_rate/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
-                       index=False)
+        rate_df.to_csv(
+            "./date_news_rate/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
+            index=False
+        )
         pd.read_csv("./date_news_rate/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv')
 
         score_word_df.to_csv(
             "./date_news_score_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
-            index=False)
+            index=False
+        )
         pd.read_csv(
-            "./date_news_score_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv')
+            "./date_news_score_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv'
+        )
 
         start_date = start_date - datetime.timedelta(days=1)

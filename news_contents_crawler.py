@@ -17,10 +17,8 @@ if not os.path.exists('score'):
 if not os.path.exists('words'):
     os.makedirs('words')
 
-TARGET_DATE = datetime.date(2021, 2, 1)
 
-
-def start(company_code):
+def start(company_code, target_date):
     if not os.path.exists("./date_news/" + company_code):
         os.makedirs("./date_news/" + company_code)
 
@@ -74,7 +72,7 @@ def start(company_code):
                 result_title.clear()
                 result_contents.clear()
 
-            if (processing_date - TARGET_DATE).days < 0:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
+            if (processing_date - target_date).days < 0:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
                 flag = False
                 break
 
