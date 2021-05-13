@@ -33,7 +33,6 @@ def get_news_list_by_company_code(company_code, date):
 
     return news_list
 
-
 def analyze(company_code, target_date):
     file_stop_word = open('불용어.txt', 'r', -1, 'utf-8')
     stop_words = file_stop_word.read()
@@ -153,3 +152,24 @@ def analyze(company_code, target_date):
         )
 
         start_date = start_date - datetime.timedelta(days=1)
+
+
+def analyze_two_weeks(company_code,target_date):
+    neg_sum = 0
+    pos_sum = 0
+    start_date = target_date
+    for diff in range(14):
+        day = start_date - datetime.timedelta(days=diff)
+        try:
+            with open("./date_news_score/" + company_code + "/" + company_code + "_" + str(day)[:10] + '.csv', 'r',
+                      -1,
+                      'utf-8') as num_data:
+                next(num_data)
+                for nums in csv.reader(num_data):
+                    pos_sum += float(nums[2])
+                    neg_sum += float(nums[0])
+
+        except FileNotFoundError:
+            continue
+
+    return pos_sum / (pos_sum + neg_sum)
