@@ -5,9 +5,9 @@ from LSTM import LSTM_score
 
 company_code_list = ['005930']
 
-start_date = '2020-02-02'
-end_date = '2021-02-02'
-predict_date = '2021-02-03'
+start_date = '2020-02-01'
+end_date = '2021-02-01'
+predict_date = '2021-02-02'
 print('start')
 
 PATH = "./"
