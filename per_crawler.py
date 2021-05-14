@@ -11,6 +11,8 @@ if not os.path.exists('per_data'):
 
 
 def start(company_code):
+    print(f"company_code: {company_code} PER 정보 크롤링 시작")
+
     url = 'https://finance.naver.com/item/main.nhn?code=' + str(company_code)
     source_code = requests.get(url).text
     html = BeautifulSoup(source_code, "lxml")

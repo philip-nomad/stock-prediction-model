@@ -5,15 +5,24 @@ import os
 import pandas as pd
 from konlpy.tag import Hannanum
 
+import news_contents_crawler
+
 hannanum = Hannanum()
 
+NEWS_WORDS_DIR = 'news_words'
 
-def start(company_code, target_date):
+
+def mkdir(company_code):
+    if not os.path.exists(f"./{NEWS_WORDS_DIR}/{company_code}"):
+        os.makedirs(f"./{NEWS_WORDS_DIR}/{company_code}")
+
+
+def start(company_code, crawling_target_date):
+    print(f"company_code: {company_code} 뉴스기사 전처리 시작")
+    mkdir(company_code)
+
     start_date = datetime.date.today()
-    while True:
-        if (start_date - target_date).days < 0:  # 원하는 날짜보다 더 과거의 날짜인 경우
-            break
-
+    while start_date < crawling_target_date:
         date_results = []
         title_results = []
         contents_results = []
@@ -22,7 +31,9 @@ def start(company_code, target_date):
         input_contexts = []
 
         try:
-            with open("./date_news/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv', 'r', -1,
+            with open(f"./{news_contents_crawler.NEWS_DIR}/{company_code}/{company_code}_{str(start_date)[:10]}.csv",
+                      'r',
+                      -1,
                       'utf-8') as news:
                 next(news)
 
@@ -49,9 +60,6 @@ def start(company_code, target_date):
                 input_content = input_content.strip()
                 input_contexts.append(input_content)
 
-            if not os.path.exists("./date_news_words/" + company_code):
-                os.makedirs("./date_news_words/" + company_code)
-
             f = open("./date_news_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
                      "w+")
             f.close()
@@ -61,9 +69,8 @@ def start(company_code, target_date):
             df["title"] = input_titles
             df["context"] = input_contexts
             df.to_csv(
-                "./date_news_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
+                f"./{NEWS_WORDS_DIR}/{company_code}/{company_code}_{str(start_date)[:10]}.csv",
                 index=False
             )
-            pd.read_csv("./date_news_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv')
 
-            start_date = start_date - datetime.timedelta(days=1)
+            start_date -= datetime.timedelta(days=1)

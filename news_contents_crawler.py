@@ -8,19 +8,20 @@ from bs4 import BeautifulSoup
 
 PATH = "./"
 os.chdir(PATH)
-if not os.path.exists('date_news'):
-    os.makedirs('date_news')
+NEWS_DIR = 'news'
 
-if not os.path.exists('score'):
-    os.makedirs('score')
-
-if not os.path.exists('words'):
-    os.makedirs('words')
+if not os.path.exists(NEWS_DIR):
+    os.makedirs(NEWS_DIR)
 
 
-def start(company_code, target_date):
-    if not os.path.exists("./date_news/" + company_code):
-        os.makedirs("./date_news/" + company_code)
+def mkdir(company_code):
+    if not os.path.exists(f"./{NEWS_DIR}/{company_code}/"):
+        os.makedirs(f"./{NEWS_DIR}/{company_code}")
+
+
+def start(company_code, crawling_target_date):
+    print(f"company_code: {company_code} 뉴스기사 크롤링 시작")
+    mkdir(company_code)
 
     unique_news_titles = set()
     page = 1
@@ -72,7 +73,7 @@ def start(company_code, target_date):
                 result_title.clear()
                 result_contents.clear()
 
-            if (processing_date - target_date).days < 0:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
+            if (processing_date - crawling_target_date).days < 0:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
                 flag = False
                 break
 
