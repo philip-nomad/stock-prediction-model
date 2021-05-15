@@ -172,4 +172,4 @@ def analyze_two_weeks(company_code,target_date):
         except FileNotFoundError:
             continue
 
-    return pos_sum / (pos_sum + neg_sum)
+    return (pos_sum / (pos_sum + neg_sum) / 0.53) - 1
