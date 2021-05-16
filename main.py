@@ -23,7 +23,7 @@ if __name__ == '__main__':
         # 4. 뉴스기사 감성분석
         #news_contents_sentimental_analysis.start(company_code, CRAWLING_TARGET_DATE)
         # 5. lstm 계산
-        lstm_calculator.start(company_code,LEARNING_DATE)
+        lstm_calculator.start(company_code, LEARNING_DATE)
         # 6. 가중치 a, b, c 를 활용하여 주가예측
         #predicted_value = prediction.start(company_code, LEARNING_DATE)
 
