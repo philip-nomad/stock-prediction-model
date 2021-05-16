@@ -187,7 +187,7 @@ def start(company_code, end_date):
         'EndDate': [end_date]
     }
     lstm_df = pd.DataFrame(result)
-    lstm_df.to_csv(f"./{DIR}/{company_code}_{end_date}.csv", index=False)
+    lstm_df.to_csv(f"./{DIR}/{company_code}/{company_code}_{end_date}.csv", index=False)
 
 
 # 정규화
