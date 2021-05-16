@@ -20,25 +20,25 @@ DIR = 'lstm_score'
 if not os.path.exists(DIR):
     os.makedirs(DIR)
 
+# 하이퍼파라미터 설정
+INPUT_DCM_CNT = 6  # 입력데이터의 컬럼 개수
+OUTPUT_DCM_CNT = 1  # 결과데이터의 컬럼 개수
+SEQ_LENGTH = 28  # 1개 시퀸스의 길이(시계열데이터 입력 개수)
+RNN_CELL_HIDDEN_DIM = 20  # 각 셀의 히든 출력 크기
+FORGET_BIAS = 1.0  # 망각편향(기본값 1.0)
+NUM_STACKED_LAYERS = 1  # Stacked LSTM Layers 개수
+KEEP_PROB = 1.0  # Dropout 할때 Keep할 비율
+EPOCH_NUM = 1000  # 에포크 횟수 (몇회 반복 학습)
+LEARNING_RATE = 0.01  # 학습률
 
 # start_date 부터 end_date 까지의 데이터를 가지고 그 다음 날의 종가를 예측합니다.
 def start(company_code, END_DATE):
+    tf.reset_default_graph()
     print(f"company_code: {company_code} lstm 계산 시작")
     START_DATE = END_DATE - relativedelta(years=2)
     # yahoo는 개이기 때문에 +1
     stock = yf.download(company_code+'.KS', start=START_DATE, end=END_DATE + relativedelta(days=1))
     print(stock)
-
-    # 하이퍼파라미터 설정
-    input_dcm_cnt = 6  # 입력데이터의 컬럼 개수
-    output_dcm_cnt = 1  # 결과데이터의 컬럼 개수
-    seq_length = 28  # 1개 시퀸스의 길이(시계열데이터 입력 개수)
-    rnn_cell_hidden_dim = 20  # 각 셀의 히든 출력 크기
-    forget_bias = 1.0  # 망각편향(기본값 1.0)
-    num_stacked_layers = 1  # Stacked LSTM Layers 개수
-    keep_prob = 1.0  # Dropout 할때 Keep할 비율
-    epoch_num = 1000  # 에포크 횟수 (몇회 반복 학습)
-    learning_rate = 0.01  # 학습률
 
     # 금액&거래량 문자열을 부동소수점형으로 변환함
     stock_info = stock.values[1:].astype(np.float)
@@ -49,8 +49,10 @@ def start(company_code, END_DATE):
     # ['Open','High','Low','Close','Adj Close','Volume']에서 'Adj Close'까지 취함
     # 마지막 열 Volume를 제외한 모든 열
     price = stock_info[:,:-1]  # 실제 종가
+    print(price.shape)
     on_closing_price = stock['Close'].iloc[-1] # 마지막날의 종가
     norm_price = min_max_scaling(price)
+    print(norm_price.shape)
     # norm_price.shape 정규화된 값
 
     # 거래량형태 데이터를 정규화한다
@@ -65,9 +67,9 @@ def start(company_code, END_DATE):
     dataX = []  # 입력으로 사용될 Sequence Data
     dataY = []  # 출력(타겟)으로 사용
 
-    for i in range(0, len(y) - seq_length):
-        _x = x[i:i + seq_length]
-        _y = y[i + seq_length]  # 다음 나타날 주가(정답)
+    for i in range(0, len(y) - SEQ_LENGTH):
+        _x = x[i:i + SEQ_LENGTH]
+        _y = y[i + SEQ_LENGTH]  # 다음 나타날 주가(정답)
         dataX.append(_x)  # dataX 리스트에 추가
         dataY.append(_y)  # dataY 리스트에 추가
 
@@ -88,7 +90,7 @@ def start(company_code, END_DATE):
 
     # 텐서플로우 placeholder 생성
     # 입력 X, 출력 Y를 생성
-    X = tf.placeholder(tf.float32, [None, seq_length, input_dcm_cnt])
+    X = tf.placeholder(tf.float32, [None, SEQ_LENGTH, INPUT_DCM_CNT])
     Y = tf.placeholder(tf.float32, [None, 1])
     print("X:", X)
     print("Y:", Y)
@@ -100,20 +102,20 @@ def start(company_code, END_DATE):
     print("predictions", predictions)
 
     # num_stacked_layer 개의 층으로 쌓인 Stacked RNNs 생성
-    stackedRNNs = [lstm_cell() for _ in range(num_stacked_layers)]  # Stacked LSTM Layers 개수 1
+    stackedRNNs = [lstm_cell() for _ in range(NUM_STACKED_LAYERS)]  # Stacked LSTM Layers 개수 1
     multi_cells = tf.contrib.rnn.MultiRNNCell(stackedRNNs,
-                                              state_is_tuple=True) if num_stacked_layers > 1 else lstm_cell()
+                                              state_is_tuple=True) if NUM_STACKED_LAYERS > 1 else lstm_cell()
 
     # RNN Cell들을 연결
-    hypothesis, _states = tf.nn.dynamic_rnn(multi_cells, X, dtype=tf.float32)
+    hypothesis, _states = tf.nn.dynamic_rnn(multi_cells, X, dtype=tf.float32, time_major=True)
     # [:. -1]보면 LSTM RNN의 마지막 (hidden)출력만을 사용함
     # 과거 여러 거래일의 주가를 이용해서 다음날의 주가 1개를 예측하기 때문에 Many-to-one 형태
-    hypothesis = tf.contrib.layers.fully_connected(hypothesis[:, -1], output_dcm_cnt, activation_fn=tf.identity)
+    hypothesis = tf.contrib.layers.fully_connected(hypothesis[:, -1], OUTPUT_DCM_CNT, activation_fn=tf.identity)
     # hypothesis.shape
 
     # 손실함수로 평균제곱오차를 사용함.
     loss = tf.reduce_sum(tf.square(hypothesis - Y))
-    optimizer = tf.train.AdamOptimizer(learning_rate)
+    optimizer = tf.train.AdamOptimizer(LEARNING_RATE)
     train = optimizer.minimize(loss)
 
     rmse = tf.sqrt(tf.reduce_mean(tf.squared_difference(targets, predictions)))
@@ -128,9 +130,9 @@ def start(company_code, END_DATE):
     # 학습
     print('학습 시작...')
 
-    for epoch in range(epoch_num):
+    for epoch in range(EPOCH_NUM):
         _, _loss = sess.run([train, loss], feed_dict={X: trainX, Y: trainY})
-        if ((epoch + 1) % 100 == 0) or (epoch == epoch_num - 1):  # 100번째마다 또는 마지막 epoch인 경우
+        if ((epoch + 1) % 100 == 0) or (epoch == EPOCH_NUM - 1):  # 100번째마다 또는 마지막 epoch인 경우
             # 학습용데이터로 rmse오차를 구한다
             train_predict = sess.run(hypothesis, feed_dict={X: trainX})
             train_error = sess.run(rmse, feed_dict={targets: trainY, predictions: train_predict})
@@ -159,7 +161,7 @@ def start(company_code, END_DATE):
     # -------------------------------
 
     # sequence length만큼의 가장 최근 데이터를 슬라이싱 함.
-    recent_data = np.array([x[len(x) - seq_length:]])
+    recent_data = np.array([x[len(x) - SEQ_LENGTH:]])
     # print("recent_data.shape:", recent_data.shape)
     # print("recent_data:", recent_data)
 
@@ -192,11 +194,11 @@ def reverse_min_max_scaling(org_x, x):  # 종가 예측값
     return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
 
 # 모델(LSTM 네트워크) 생성
-def lstm_cell(rnn_cell_hidden_dim, forget_bias, keep_prob):
-    cell = tf.contrib.rnn.BasicLSTMCell(num_units=rnn_cell_hidden_dim,
-                                        forget_bias=forget_bias,
+def lstm_cell():
+    cell = tf.contrib.rnn.BasicLSTMCell(num_units=RNN_CELL_HIDDEN_DIM,
+                                        forget_bias=FORGET_BIAS,
                                         state_is_tuple=True,
                                         activation=tf.nn.softsign)
-    if keep_prob < 1.0:
-        cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
+    if KEEP_PROB < 1.0:
+        cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=KEEP_PROB)
     return cell

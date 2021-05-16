@@ -52,3 +52,8 @@ def start(company_code, learning_date):
     print(f"company_code: {company_code}")
     print(f"learning_date: {learning_date}")
     print(f"predicted_value: {predicted_value}%")
+
+######### 모델 a,b,c
+#lstm_data =
+#emotional_data =
+#per_data =
