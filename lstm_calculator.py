@@ -32,6 +32,17 @@ LEARNING_RATE = 0.01  # 학습률
 if not os.path.exists(DIR):
     os.makedirs(DIR)
 
+# 하이퍼파라미터 설정
+INPUT_DCM_CNT = 6  # 입력데이터의 컬럼 개수
+OUTPUT_DCM_CNT = 1  # 결과데이터의 컬럼 개수
+SEQ_LENGTH = 28  # 1개 시퀸스의 길이(시계열데이터 입력 개수)
+RNN_CELL_HIDDEN_DIM = 20  # 각 셀의 히든 출력 크기
+FORGET_BIAS = 1.0  # 망각편향(기본값 1.0)
+NUM_STACKED_LAYERS = 1  # Stacked LSTM Layers 개수
+KEEP_PROB = 1.0  # Dropout 할때 Keep할 비율
+EPOCH_NUM = 1000  # 에포크 횟수 (몇회 반복 학습)
+LEARNING_RATE = 0.01  # 학습률
+
 
 def mkdir(company_code):
     if not os.path.exists(f"./{DIR}/{company_code}"):
@@ -61,6 +72,7 @@ def start(company_code, end_date):
     price = stock_info[:, :-1]  # 실제 종가
     on_closing_price = stock['Close'].iloc[-1]  # 마지막 날의 종가
     norm_price = min_max_scaling(price)
+    print(norm_price.shape)
     # norm_price.shape 정규화된 값
 
     # 거래량형태 데이터를 정규화한다

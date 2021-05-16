@@ -7,10 +7,10 @@ import news_contents_sentimental_analysis
 import per_crawler
 import prediction
 
-COMPANY_CODE_LIST = ['035420', '000660']
+COMPANY_CODE_LIST = ['005930', '035720', '035420', '000660']
 #COMPANY_CODE_LIST = ['035720']
 CRAWLING_TARGET_DATE = datetime.date(2021, 5, 14)  # 어느 날까지 크롤링을 할 것인가
-LEARNING_DATE = datetime.date(2021, 2, 14)  # 어느 날까지 학습하여 그 다음 날 주가를 예측할 것인가
+LEARNING_DATE = datetime.date(2021, 3, 12)  # 어느 날까지 학습하여 그 다음 날 주가를 예측할 것인가
 # 11pm 에 돌릴 함수
 if __name__ == '__main__':
     for company_code in COMPANY_CODE_LIST:
