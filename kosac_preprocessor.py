@@ -17,12 +17,11 @@ def mkdir(company_code):
         os.makedirs(f"./{NEWS_WORDS_DIR}/{company_code}")
 
 
-def start(company_code, crawling_target_date):
+def start(company_code, start_date, end_date):
     print(f"company_code: {company_code} 뉴스기사 전처리 시작")
     mkdir(company_code)
 
-    start_date = datetime.date.today()
-    while start_date < crawling_target_date:
+    while start_date <= end_date:
         date_results = []
         title_results = []
         contents_results = []
@@ -42,7 +41,7 @@ def start(company_code, crawling_target_date):
                     title_results.append(line[2])
                     contents_results.append(line[3])
         except FileNotFoundError:
-            start_date = start_date - datetime.timedelta(days=1)
+            print('FileNotFoundError: 해당 날짜에 뉴스기사가 존재하지 않습니다.')
         else:
             for title in title_results:
                 text = hannanum.nouns(title)
@@ -60,7 +59,7 @@ def start(company_code, crawling_target_date):
                 input_content = input_content.strip()
                 input_contexts.append(input_content)
 
-            f = open("./date_news_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
+            f = open(f"./{NEWS_WORDS_DIR}/{company_code}/{company_code}_{str(start_date)[:10]}.csv",
                      "w+")
             f.close()
             columns = ['time', 'title', 'context']
@@ -73,4 +72,5 @@ def start(company_code, crawling_target_date):
                 index=False
             )
 
-            start_date -= datetime.timedelta(days=1)
+        finally:
+            start_date += datetime.timedelta(days=1)
