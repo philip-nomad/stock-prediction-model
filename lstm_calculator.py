@@ -2,6 +2,7 @@ import logging
 import os
 import warnings
 
+warnings.filterwarnings('ignore', category=FutureWarning)
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -12,7 +13,6 @@ from dateutil.relativedelta import relativedelta
 # START_DATE = END_DATE - relativedelta(years=2)
 
 logging.getLogger('tensorflow').disabled = True
-warnings.filterwarnings('ignore', category=FutureWarning)
 
 PATH = "./"
 os.chdir(PATH)
@@ -31,17 +31,6 @@ LEARNING_RATE = 0.01  # 학습률
 
 if not os.path.exists(DIR):
     os.makedirs(DIR)
-
-# 하이퍼파라미터 설정
-INPUT_DCM_CNT = 6  # 입력데이터의 컬럼 개수
-OUTPUT_DCM_CNT = 1  # 결과데이터의 컬럼 개수
-SEQ_LENGTH = 28  # 1개 시퀸스의 길이(시계열데이터 입력 개수)
-RNN_CELL_HIDDEN_DIM = 20  # 각 셀의 히든 출력 크기
-FORGET_BIAS = 1.0  # 망각편향(기본값 1.0)
-NUM_STACKED_LAYERS = 1  # Stacked LSTM Layers 개수
-KEEP_PROB = 1.0  # Dropout 할때 Keep할 비율
-EPOCH_NUM = 1000  # 에포크 횟수 (몇회 반복 학습)
-LEARNING_RATE = 0.01  # 학습률
 
 
 def mkdir(company_code):
