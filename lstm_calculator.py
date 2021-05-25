@@ -1,12 +1,13 @@
 import logging
 import os
-import warnings
-
 import numpy as np
 import pandas as pd
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 import tensorflow as tf
 import yfinance as yf
 from dateutil.relativedelta import relativedelta
+import matplotlib.pyplot as plt
 
 # END_DATE = datetime.date.today() 데이터를 모아야 하기때문에
 # START_DATE = END_DATE - relativedelta(years=2)
@@ -24,25 +25,13 @@ OUTPUT_DCM_CNT = 1  # 결과데이터의 컬럼 개수
 SEQ_LENGTH = 28  # 1개 시퀸스의 길이(시계열데이터 입력 개수)
 RNN_CELL_HIDDEN_DIM = 20  # 각 셀의 히든 출력 크기
 FORGET_BIAS = 1.0  # 망각편향(기본값 1.0)
-NUM_STACKED_LAYERS = 1  # stacked lstm layers 개수
-KEEP_PROB = 1.0  # dropout 할때 keep 할 비율
-EPOCH_NUM = 1000  # 에포크 횟수 (몇회 반복 학습)
-LEARNING_RATE = 0.01  # 학습률
-
-if not os.path.exists(DIR):
-    os.makedirs(DIR)
-
-# 하이퍼파라미터 설정
-INPUT_DCM_CNT = 6  # 입력데이터의 컬럼 개수
-OUTPUT_DCM_CNT = 1  # 결과데이터의 컬럼 개수
-SEQ_LENGTH = 28  # 1개 시퀸스의 길이(시계열데이터 입력 개수)
-RNN_CELL_HIDDEN_DIM = 20  # 각 셀의 히든 출력 크기
-FORGET_BIAS = 1.0  # 망각편향(기본값 1.0)
 NUM_STACKED_LAYERS = 1  # Stacked LSTM Layers 개수
 KEEP_PROB = 1.0  # Dropout 할때 Keep할 비율
 EPOCH_NUM = 1000  # 에포크 횟수 (몇회 반복 학습)
 LEARNING_RATE = 0.01  # 학습률
 
+if not os.path.exists(DIR):
+    os.mkdir(DIR)
 
 def mkdir(company_code):
     if not os.path.exists(f"./{DIR}/{company_code}"):
@@ -172,12 +161,12 @@ def start(company_code, end_date):
     # plt.plot(test_error_summary, 'b')
     # plt.xlabel('Epoch(x100)')
     # plt.ylabel('Root Mean Square Error')
-    # plt.figure(2)
-    # plt.plot(testY, 'r')
-    # plt.plot(test_predict, 'b')
-    # plt.xlabel('Time Period')
-    # plt.ylabel('Stock Price')
-    # plt.show()
+    #plt.figure(2)
+    #plt.plot(test_y, 'r')
+    #plt.plot(test_predict, 'b')
+    #plt.xlabel('Time Period')
+    #plt.ylabel('Stock Price')
+    #plt.show()
     # -------------------------------
 
     # sequence length 만큼의 가장 최근 데이터를 슬라이싱 함.

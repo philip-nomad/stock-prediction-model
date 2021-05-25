@@ -16,8 +16,8 @@ with open('polarity.csv', 'r', -1, 'utf-8') as polarity:
 
         table[key] = {'Neg': line[3], 'Neut': line[4], 'Pos': line[6]}
 
-NEWS_SCORE_DIR = 'news_score'
-NEWS_SCORE_WORDS_DIR = 'news_score_words'
+NEWS_SCORE_DIR = 'date_news_score'
+NEWS_SCORE_WORDS_DIR = 'date_news_score_words'
 
 
 def mkdir(company_code):
@@ -120,9 +120,15 @@ def calculate_two_weeks(company_code, target_date):
                       'utf-8') as num_data:
                 next(num_data)
 
+                pos_list = []
+                neg_list = []
+
                 for nums in csv.reader(num_data):
-                    pos_sum += float(nums[2])
-                    neg_sum += float(nums[0])
+                    pos_list.append(float(nums[2]))
+                    neg_list.append(float(nums[0]))
+
+            pos_sum+=pos_list[-1]
+            neg_sum+=neg_list[-1]
 
         except FileNotFoundError:
             # 기사가 아예 없는 날은 파일이 생성이 안됨
@@ -130,6 +136,7 @@ def calculate_two_weeks(company_code, target_date):
             continue
 
     ratio = pos_sum / (pos_sum + neg_sum)
-    portion = (ratio - 1) / 0.53
+    #print(ratio)
+    portion = (ratio / 0.53) - 1
 
     return portion
