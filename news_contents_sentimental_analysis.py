@@ -16,8 +16,10 @@ with open('polarity.csv', 'r', -1, 'utf-8') as polarity:
 
         table[key] = {'Neg': line[3], 'Neut': line[4], 'Pos': line[6]}
 
-NEWS_SCORE_DIR = 'date_news_score'
-NEWS_SCORE_WORDS_DIR = 'date_news_score_words'
+NEWS_SCORE_DIR = 'news_score'
+NEWS_SCORE_WORDS_DIR = 'news_score_words'
+NEWS_WORDS_DIR = 'news_words'
+
 
 
 def mkdir(company_code):
@@ -27,11 +29,14 @@ def mkdir(company_code):
     if not os.path.exists(f"./{NEWS_SCORE_WORDS_DIR}/{company_code}"):
         os.makedirs(f"./{NEWS_SCORE_WORDS_DIR}/{company_code}")
 
+    if not os.path.exists(f"./{NEWS_WORDS_DIR}/{company_code}"):
+        os.makedirs(f"./{NEWS_WORDS_DIR}/{company_code}")
+
 
 def get_news_list_by_company_code(company_code, date):
     news_list = []
     try:
-        with open("./date_news_words/" + company_code + "/" + company_code + "_" + str(date)[:10] + '.csv', 'r', -1,
+        with open(f"./{NEWS_WORDS_DIR}/{company_code}/{company_code}_{str(date)[:10]}.csv", 'r', -1,
                   'utf-8') as news_data:
             next(news_data)
 
@@ -45,7 +50,7 @@ def get_news_list_by_company_code(company_code, date):
     return news_list
 
 
-def start(company_code, crawling_target_date):
+def start(company_code, start_date, end_date):
     print(f"company_code: {company_code} 뉴스기사 감성분석 시작")
     mkdir(company_code)
 
@@ -54,9 +59,7 @@ def start(company_code, crawling_target_date):
     stop_words = set(stop_words.split('\n'))
     file_stop_word.close()
 
-    start_date = datetime.date.today()
-
-    while start_date < crawling_target_date:
+    while start_date <= end_date:
         negative_list = []
         neutral_list = []
         positive_list = []
@@ -93,18 +96,18 @@ def start(company_code, crawling_target_date):
         score_result = {'negative': negative_list, 'neutral': neutral_list, 'positive': positive_list}
         score_df = pd.DataFrame(score_result)
         score_df.to_csv(
-            "./date_news_score/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
+            f"./{NEWS_SCORE_DIR}/{company_code}/{company_code}_{str(start_date)[:10]}.csv",
             index=False
         )
 
         score_word_result = {'words': score_word_list}
         score_word_df = pd.DataFrame(score_word_result)
         score_word_df.to_csv(
-            "./date_news_score_words/" + company_code + "/" + company_code + "_" + str(start_date)[:10] + '.csv',
+            f"./{NEWS_SCORE_WORDS_DIR}/{company_code}/{company_code}_{str(start_date)[:10]}.csv",
             index=False
         )
 
-        start_date -= datetime.timedelta(days=1)
+        start_date += datetime.timedelta(days=1)
 
 
 def calculate_two_weeks(company_code, target_date):
@@ -119,16 +122,14 @@ def calculate_two_weeks(company_code, target_date):
                       -1,
                       'utf-8') as num_data:
                 next(num_data)
-
                 pos_list = []
                 neg_list = []
-
                 for nums in csv.reader(num_data):
                     pos_list.append(float(nums[2]))
                     neg_list.append(float(nums[0]))
+            neg_sum += neg_list[-1]
+            pos_sum += pos_list[-1]
 
-            pos_sum+=pos_list[-1]
-            neg_sum+=neg_list[-1]
 
         except FileNotFoundError:
             # 기사가 아예 없는 날은 파일이 생성이 안됨
@@ -136,7 +137,56 @@ def calculate_two_weeks(company_code, target_date):
             continue
 
     ratio = pos_sum / (pos_sum + neg_sum)
-    #print(ratio)
     portion = (ratio / 0.53) - 1
 
     return portion
+
+
+def get_score_word(company_code, date):
+    news_list = ""
+    try:
+        with open(f"./{NEWS_SCORE_WORDS_DIR}/" + company_code + "/" + company_code + "_" + str(date)[:10] + '.csv',
+                  'r', -1,
+                  'utf-8') as news_data:
+            next(news_data)
+
+            for news in csv.reader(news_data):
+                news_list += news[0] + " "
+    except FileNotFoundError:
+        return ""
+
+    news_list = news_list.strip()
+    return news_list
+
+
+def get_sentimental_score(company_code, date):
+    neg = []
+    neu = []
+    pos = []
+
+    try:
+        with open(f"./{NEWS_SCORE_DIR}/" + company_code + "/" + company_code + "_" + str(date)[:10] + '.csv',
+                  'r', -1,
+                  'utf-8') as news_data:
+            next(news_data)
+            for news in csv.reader(news_data):
+                neg.append(float(news[0]))
+                neu.append(float(news[1]))
+                pos.append(float(news[2]))
+
+    except FileNotFoundError:
+        return [0, 0, 0]
+
+    return [neg[-1], neu[-1], pos[-1]]
+
+
+def get_lstm_prediction_data(company_code, date):
+    # LSTM 값 불러오기
+    with open(f"./lstm_score/{company_code}/{company_code}_{date}.csv", 'r', -1, 'utf-8') as lines:
+        next(lines)
+
+        for line in csv.reader(lines):
+            lstm_prediction_price = round(float(line[0]))
+            closing_price = int(float(line[1]))
+
+    return lstm_prediction_price, closing_price

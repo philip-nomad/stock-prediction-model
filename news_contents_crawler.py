@@ -19,19 +19,18 @@ def mkdir(company_code):
         os.makedirs(f"./{NEWS_DIR}/{company_code}")
 
 
-def start(company_code, crawling_target_date):
+def start(company_code, start_date, end_date):
     print(f"company_code: {company_code} 뉴스기사 크롤링 시작")
     mkdir(company_code)
 
     unique_news_titles = set()
     page = 1
+    processing_date = end_date
     while True:
         url = 'https://finance.naver.com/item/news_news.nhn?code=' + str(company_code) + '&page=' + str(page)
 
         source_code = requests.get(url).text
         html = BeautifulSoup(source_code, "lxml")
-
-        processing_date = datetime.date.today()  # 오늘 날짜부터 시작
 
         dates = [datetime.datetime.strptime(date.get_text(), ' %Y.%m.%d %H:%M').date() for date in html.select('.date')]
         titles = [re.sub('\n', '', str(title.get_text())) for title in html.select('.title')]
@@ -48,6 +47,9 @@ def start(company_code, crawling_target_date):
             title = row[1]
             link = row[2]
 
+            if date > end_date:
+                continue
+
             if title in unique_news_titles:
                 continue
 
@@ -60,11 +62,11 @@ def start(company_code, crawling_target_date):
             a = contents.find("<a")
             contents = remove_filename(contents[0:a])
 
-            if (processing_date - date).days != 0:  # row 단위로 뉴스기사를 읽어오다가 날짜가 달라진 경우
+            if processing_date != date:  # row 단위로 뉴스기사를 읽어오다가 날짜가 달라진 경우
                 result = {"날짜": result_date, "기사제목": result_title, "본문내용": result_contents}
                 df_result = pd.DataFrame(result)
                 df_result.to_csv(
-                    "./date_news/" + company_code + "/" + company_code + "_" + str(processing_date)[:10] + '.csv',
+                    f"./{NEWS_DIR}/{company_code}/{company_code}_{str(processing_date)[:10]}.csv",
                     mode='w',
                     encoding='utf-8-sig'
                 )
@@ -73,7 +75,7 @@ def start(company_code, crawling_target_date):
                 result_title.clear()
                 result_contents.clear()
 
-            if (processing_date - crawling_target_date).days < 0:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
+            if start_date > date:  # 현재 읽어오려는 뉴스기사의 날짜가 원하는 날짜보다 더 과거의 날짜인 경우
                 flag = False
                 break
 
@@ -84,7 +86,7 @@ def start(company_code, crawling_target_date):
         if not flag:
             break
 
-        print(f"company_code: {company_code}, processing_date: {processing_date}, 크롤링 끝난 페이지: {page}")
+        # print(f"company_code: {company_code}, processing_date: {processing_date}, 크롤링 끝난 페이지: {page}")
         page += 1
 
 
