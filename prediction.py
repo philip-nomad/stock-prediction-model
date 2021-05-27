@@ -93,6 +93,7 @@ def start(company_code, learning_date):
     #price=price.reshape(15)
     #print(price.shape)
     today_y = price
+    print(today_y)
 
 
     X1 = tf.placeholder(tf.float32, shape=[None])
@@ -101,39 +102,45 @@ def start(company_code, learning_date):
     X4 = tf.placeholder(tf.float32, shape=[None])
     Y = tf.placeholder(tf.float32, shape=[None])
 
-    W1 = tf.Variable(0.6, dtype=tf.float32, name='W1')
-    W2 = tf.Variable(0.3, dtype=tf.float32, name='W2')
+    W1 = tf.Variable(0.6, dtype=tf.float32, name='W1', constraint=lambda x: tf.clip_by_value(x, 0, 1))
+    W2 = tf.Variable(0.3, dtype=tf.float32, name='W2', constraint=lambda x: tf.clip_by_value(x, 0, 1))
     W3 = 1-(W1+W2)
+    sum =W1+W2+W3
 
     init_op = tf.initialize_all_variables()
     hypothesis = ((X1*W1 + X2*W2 + X3*W3)/100 + 1) * X4
-
     cost=tf.reduce_mean(tf.square(hypothesis-Y))
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-6)
     train = optimizer.minimize(cost)
-    sess = tf.Session()
-    sess.run(init_op)
-
-    for step in range(5):
-        cost_val, hy_val, W1_val, W2_val, W3_val, sum, _ = sess.run(
-            [cost, hypothesis, W1, W2, W3, W1 + W2 + W3, train],
-            feed_dict={X1: lstm_x, X2: emotional_x, X3: per_x, X4: previous_x, Y: today_y}
-        )
-        if step == 4:
-            print(step,"\nFinal Prediction:\n", hy_val[-1], "\nW3:", W3_val, "\nW2:", W2_val, "\nW1:", W1_val, "\nSum", sum)
-        else:
-            print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", W3_val, "\nW2:", W2_val, "\nW1:", W1_val,
-                  "\nSum", sum)
-
-
     """
-    predicted_value = 100 * (lstm_value * WEIGHT_FOR_LSTM_VALUE +
-                             float(emotional_analysis_value) * WEIGHT_FOR_EMOTIONAL_ANALYSIS_VALUE +
-                             per_value * WEIGHT_FOR_PER_VALUE)
+    final_W1=0.0
+    final_W2=0.0
+    final_W3=0.0
+    """
+    with tf.Session() as sess:
+        sess.run(init_op)
+        for step in range(5):
+            cost_val, hy_val, _ = sess.run(
+                [cost, hypothesis, train],
+                feed_dict={X1: lstm_x, X2: emotional_x, X3: per_x, X4: previous_x, Y: today_y}
+            )
+            if step == 4:
+                print(step, "\nW3:", sess.run(W3), "\nW2:", sess.run(W2), "\nW1:", sess.run(W1), "\nSum", sess.run(sum))
+                """
+                final_W1 = sess.run(W1)
+                final_W2 = sess.run(W2)
+                final_W3 = sess.run(W3)
+                """
+            else:
+                print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(W3), "\nW2:", sess.run(W2), "\nW1:", sess.run(W1),
+                    "\nSum", sess.run(sum))
 
-    print(f"company_code: {company_code}")
-    print(f"learning_date: {learning_date}")
-    print(f"predicted_value: {predicted_value}%")
+
+    print(final_W1,final_W2,final_W3)
+    """
+    if 부분이 학습을 모두 끝내고 출력하는 거에여 사실 가중치들만 출력하면 되는데 일단 혹시 몰라서 학습내용도 다 출력 시켰습니다.
+    final_W1, final_W2, final_W3를 return 하면 최종 가중치들 입니다. 일단 주석 처리 해놓을꼐여 
+    이거 return해서 각각 순서대로 lstm, 감성분석, per에 넣어서 계산하면 됩니다.
     """
 
 
