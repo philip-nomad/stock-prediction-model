@@ -1,15 +1,16 @@
 import csv
 import os
+import warnings
+
+import numpy as np
+import pandas as pd
 from dateutil.relativedelta import relativedelta
+
 import lstm_calculator
 import news_contents_sentimental_analysis
-import pandas as pd
-import numpy as np
-import warnings
+
 warnings.filterwarnings('ignore', category=FutureWarning)
 import tensorflow as tf
-import datetime
-
 
 WEIGHT_FOR_LSTM_VALUE = 0.6  # 가중치 a: LSTM 가중치
 WEIGHT_FOR_EMOTIONAL_ANALYSIS_VALUE = 0.3  # 가중치 b: 감성분석 점수 가중치
@@ -75,25 +76,19 @@ def start(company_code, learning_date):
 
     stockstart_date=learning_date-relativedelta(days=29)
     stock = pd.read_csv(f"./{STOCKDIR}/{company_code}.KS.csv")
-    #print(stock)
+
     stock_info = pd.DataFrame(stock)
     stock_info = stock_info.set_index(['Date'])
     stock_info = stock_info.loc[stockstart_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
     stock_info = stock_info.values[0:, 1:].astype(np.float)
-    #price = stock_info.iloc[]
-    #print(stock_info)
     price = stock_info[:, -3]
-    #print(price)
-    #print(price.shape)
+
     xy = pd.read_csv(f"./{DIR}/{company_code}/{company_code}.csv")
     lstm_x = xy.iloc[:, 1]
     emotional_x = xy.iloc[:, 2]
     per_x = xy.iloc[:, 3]
     previous_x = xy.iloc[:, 4]
-    #price=price.reshape(15)
-    #print(price.shape)
     today_y = price
-    print(today_y)
 
 
     X1 = tf.placeholder(tf.float32, shape=[None])
@@ -135,8 +130,7 @@ def start(company_code, learning_date):
                 print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(W3), "\nW2:", sess.run(W2), "\nW1:", sess.run(W1),
                     "\nSum", sess.run(sum))
 
-
-    print(final_W1,final_W2,final_W3)
+    # print(final_W1,final_W2,final_W3)
     """
     if 부분이 학습을 모두 끝내고 출력하는 거에여 사실 가중치들만 출력하면 되는데 일단 혹시 몰라서 학습내용도 다 출력 시켰습니다.
     final_W1, final_W2, final_W3를 return 하면 최종 가중치들 입니다. 일단 주석 처리 해놓을꼐여 
