@@ -3,8 +3,8 @@ import os
 from dateutil.relativedelta import relativedelta
 import lstm_calculator
 import news_contents_sentimental_analysis
-import yfinance as yf
 import pandas as pd
+import numpy as np
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 import tensorflow as tf
@@ -18,14 +18,16 @@ WEIGHT_FOR_PER_VALUE = 0.1  # 가중치 c: PER 점수 가중치
 PATH = "./"
 os.chdir(PATH)
 DIR = 'prediction_score'
+STOCKDIR = 'stock'
 
 def mkdir(company_code):
     if not os.path.exists(f"./{DIR}/{company_code}"):
         os.makedirs(f"./{DIR}/{company_code}")
 
 def start(company_code, learning_date):
-    for i in range(20):
-        with open(f"./{lstm_calculator.DIR}/{company_code}/{company_code}_{learning_date}.csv", 'r', -1,
+    learningstart_date=learning_date-relativedelta(days=30)
+    for i in range(30):
+        with open(f"./{lstm_calculator.DIR}/{company_code}/{company_code}_{learningstart_date}.csv", 'r', -1,
                   'utf-8') as lines:
             next(lines)
 
@@ -53,32 +55,45 @@ def start(company_code, learning_date):
         else:
             per_value_csv = 0
     
-    
-    
-        stock = yf.download(company_code + '.KS', start=learning_date + datetime.timedelta(days=1), end=learning_date + datetime.timedelta(days=2))
-        print(stock)
-        today_closing_price = stock['Close'].iloc[-1]
-        print(today_closing_price)
+
         result = {
-            'LearningDate': [learning_date],
-            'LstmScore': [lstm_value],
+            'LearningDate': [learningstart_date],
+            'LstmScore': [float(lstm_value)],
             'EmotionalScore': [emotional_analysis_csv],
             'PerScore': [per_value_csv],
             'PreviousClosingPrice': [previous_closing_price],
-            'TodayClosingPrice': [today_closing_price]
         }
         prediction_df = pd.DataFrame(result, columns=["LearningDate", "LstmScore", "EmotionalScore", "PerScore",
-                                                      "PreviousClosingPrice", "TodayClosingPrice"])
-        prediction_df.to_csv(f"./{DIR}/{company_code}/{company_code}.csv", index=False, mode='a', header=False)
-        learning_date = learning_date-datetime.timedelta(days=1)
+                                                      "PreviousClosingPrice"])
+        if i==0:
+            prediction_df.to_csv(f"./{DIR}/{company_code}/{company_code}.csv", index=False, header=True)
+        else:
+            prediction_df.to_csv(f"./{DIR}/{company_code}/{company_code}.csv", index=False, mode='a', header=False)
+
+        learningstart_date = learningstart_date + relativedelta(days=1)
 
 
+    stockstart_date=learning_date-relativedelta(days=29)
+    stock = pd.read_csv(f"./{STOCKDIR}/{company_code}.KS.csv")
+    #print(stock)
+    stock_info = pd.DataFrame(stock)
+    stock_info = stock_info.set_index(['Date'])
+    stock_info = stock_info.loc[stockstart_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
+    stock_info = stock_info.values[0:, 1:].astype(np.float)
+    #price = stock_info.iloc[]
+    #print(stock_info)
+    price = stock_info[:, -3]
+    #print(price)
+    #print(price.shape)
     xy = pd.read_csv(f"./{DIR}/{company_code}/{company_code}.csv")
     lstm_x = xy.iloc[:, 1]
     emotional_x = xy.iloc[:, 2]
     per_x = xy.iloc[:, 3]
     previous_x = xy.iloc[:, 4]
-    today_y = xy.iloc[:, -1]
+    #price=price.reshape(15)
+    #print(price.shape)
+    today_y = price
+
 
     X1 = tf.placeholder(tf.float32, shape=[None])
     X2 = tf.placeholder(tf.float32, shape=[None])
@@ -88,26 +103,27 @@ def start(company_code, learning_date):
 
     W1 = tf.Variable(0.6, dtype=tf.float32, name='W1')
     W2 = tf.Variable(0.3, dtype=tf.float32, name='W2')
-    w4 = tf.Variable(1.0, dtype=tf.float32)
-    w4_sum = w4.assign(tf.add(W1, W2))
-    W3 = tf.Variable(1.0-(W1+W2), name='W3')
+    W3 = 1-(W1+W2)
 
     init_op = tf.initialize_all_variables()
     hypothesis = ((X1*W1 + X2*W2 + X3*W3)/100 + 1) * X4
 
     cost=tf.reduce_mean(tf.square(hypothesis-Y))
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-5)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-6)
     train = optimizer.minimize(cost)
     sess = tf.Session()
     sess.run(init_op)
 
-    for step in range(20):
+    for step in range(5):
         cost_val, hy_val, W1_val, W2_val, W3_val, sum, _ = sess.run(
             [cost, hypothesis, W1, W2, W3, W1 + W2 + W3, train],
             feed_dict={X1: lstm_x, X2: emotional_x, X3: per_x, X4: previous_x, Y: today_y}
         )
-        print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", W3_val, "\nW2:", W2_val, "\nW1:", W1_val,
-              "\nSum", sum)
+        if step == 4:
+            print(step,"\nFinal Prediction:\n", hy_val[-1], "\nW3:", W3_val, "\nW2:", W2_val, "\nW1:", W1_val, "\nSum", sum)
+        else:
+            print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", W3_val, "\nW2:", W2_val, "\nW1:", W1_val,
+                  "\nSum", sum)
 
 
     """
