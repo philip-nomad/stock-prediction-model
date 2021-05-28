@@ -38,7 +38,8 @@ def start(company_code, learning_date):
 
         lstm_value = (lstm_prediction - previous_closing_price) / previous_closing_price  # (다음날 예측 종가 - 오늘 종가) / 오늘 종가
         # 감성분석 값 불러오기
-        emotional_analysis_csv = news_contents_sentimental_analysis.calculate_two_weeks(company_code, learning_date)
+        emotional_analysis_csv = news_contents_sentimental_analysis.calculate_two_weeks(company_code,
+                                                                                        learningstart_date)
 
         # PER 값 불러오기
         company_per_csv = 0
@@ -90,22 +91,21 @@ def start(company_code, learning_date):
     previous_x = xy.iloc[:, 4]
     today_y = price
 
-
-    X1 = tf.placeholder(tf.float32, shape=[None])
-    X2 = tf.placeholder(tf.float32, shape=[None])
-    X3 = tf.placeholder(tf.float32, shape=[None])
-    X4 = tf.placeholder(tf.float32, shape=[None])
-    Y = tf.placeholder(tf.float32, shape=[None])
+    X1 = tf.placeholder(tf.float32, shape=[None])  # lstm score
+    X2 = tf.placeholder(tf.float32, shape=[None])  # sentimental score
+    X3 = tf.placeholder(tf.float32, shape=[None])  # per score
+    X4 = tf.placeholder(tf.float32, shape=[None])  # previousday close
+    Y = tf.placeholder(tf.float32, shape=[None])  # today close
 
     W1 = tf.Variable(0.6, dtype=tf.float32, name='W1', constraint=lambda x: tf.clip_by_value(x, 0, 1))
     W2 = tf.Variable(0.3, dtype=tf.float32, name='W2', constraint=lambda x: tf.clip_by_value(x, 0, 1))
-    W3 = 1-(W1+W2)
-    sum =W1+W2+W3
+    W3 = 1 - (W1 + W2)
+    sum = W1 + W2 + W3
 
     init_op = tf.initialize_all_variables()
-    hypothesis = ((X1*W1 + X2*W2 + X3*W3)/100 + 1) * X4
-    cost=tf.reduce_mean(tf.square(hypothesis-Y))
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-6)
+    hypothesis = ((X1 * W1 + X2 * W2 + X3 * W3) / 100 + 1) * X4
+    cost = tf.reduce_mean(tf.square(hypothesis - Y))
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-8)
     train = optimizer.minimize(cost)
     """
     final_W1=0.0
