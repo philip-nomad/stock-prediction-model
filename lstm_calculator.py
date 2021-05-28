@@ -1,13 +1,13 @@
 import logging
 import os
-import warnings
-
-warnings.filterwarnings('ignore', category=FutureWarning)
 import numpy as np
 import pandas as pd
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 import tensorflow as tf
 import yfinance as yf
 from dateutil.relativedelta import relativedelta
+import matplotlib.pyplot as plt
 
 # END_DATE = datetime.date.today() 데이터를 모아야 하기때문에
 # START_DATE = END_DATE - relativedelta(years=2)
@@ -161,12 +161,12 @@ def start(company_code, end_date):
     # plt.plot(test_error_summary, 'b')
     # plt.xlabel('Epoch(x100)')
     # plt.ylabel('Root Mean Square Error')
-    # plt.figure(2)
-    # plt.plot(testY, 'r')
-    # plt.plot(test_predict, 'b')
-    # plt.xlabel('Time Period')
-    # plt.ylabel('Stock Price')
-    # plt.show()
+    #plt.figure(2)
+    #plt.plot(test_y, 'r')
+    #plt.plot(test_predict, 'b')
+    #plt.xlabel('Time Period')
+    #plt.ylabel('Stock Price')
+    #plt.show()
     # -------------------------------
 
     # sequence length 만큼의 가장 최근 데이터를 슬라이싱 함.

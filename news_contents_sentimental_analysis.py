@@ -16,6 +16,7 @@ with open('polarity.csv', 'r', -1, 'utf-8') as polarity:
 
         table[key] = {'Neg': line[3], 'Neut': line[4], 'Pos': line[6]}
 
+
 NEWS_SCORE_DIR = 'news_score'
 NEWS_SCORE_WORDS_DIR = 'news_score_words'
 NEWS_WORDS_DIR = 'news_words'
