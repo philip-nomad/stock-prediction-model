@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
+
 import lstm_calculator
 import news_contents_sentimental_analysis
 
@@ -136,9 +137,4 @@ def start(company_code, learning_date):
     final_W1, final_W2, final_W3를 return 하면 최종 가중치들 입니다. 일단 주석 처리 해놓을꼐여 
     이거 return해서 각각 순서대로 lstm, 감성분석, per에 넣어서 계산하면 됩니다.
     """
-
-
-
-
-
 
