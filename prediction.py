@@ -4,6 +4,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import yfinance as yf
 from dateutil.relativedelta import relativedelta
 
 import lstm_calculator
@@ -75,21 +76,52 @@ def start(company_code, learning_date):
 
         learning_start_date = learning_start_date + relativedelta(days=1)
 
-    stock_start_date = learning_date - relativedelta(days=29)
-    stock = pd.read_csv(f"./{STOCK_DIR}/{company_code}.KS.csv")
+    stock_start_date = learning_date - relativedelta(days=30)
+    stock_info = yf.download(company_code + '.KS', start=learning_date - relativedelta(days=40), end=learning_date)
 
-    stock_info = pd.DataFrame(stock)
-    stock_info = stock_info.set_index(['Date'])
+    # stock = pd.read_csv(f"./{STOCK_DIR}/{company_code}.KS.csv")
+
+    # stock_info = stock_info.set_index(['Date'])
     stock_info = stock_info.loc[stock_start_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
+    stock_info_date_list = list(stock_info.index)
+
     stock_info = stock_info.values[0:, 1:].astype(np.float)
-    price = stock_info[:, -3]
+
+    # 날짜 뽑기 x
+    # 종가 뽑기 y (x == y)
+    # [{x1: y1}, {x2: y2}, {x3: y3}]
+
+    # str(list(stock_info.index)[0].date())
+
+    prices = stock_info[:, -3]  # 한달 치 실제 종가
+    zip_iterator = zip(stock_info_date_list, prices)
+    temp_date = None
+    temp_price = 0
+    result = []
+    for data in zip_iterator:
+        if temp_date is None:
+            temp_date = data[0]
+            temp_price = data[1]
+        else:
+            date_gap = (data[0] - temp_date)  # 1, 2, 3
+            for _ in range(date_gap.days):
+                result.append(temp_price)
+
+            temp_date = data[0]
+            temp_price = data[1]
+
+    if stock_info_date_list[-1] != learning_date:
+        for _ in range((learning_date - stock_info_date_list[-1].date()).days):
+            result.append(temp_price)
+
+    # result = [82000, 81900, 82300, 82300, 82300]
 
     xy = pd.read_csv(f"./{DIR}/{company_code}/{company_code}.csv")
     lstm_x = xy.iloc[:, 1]
     emotional_x = xy.iloc[:, 2]
     per_x = xy.iloc[:, 3]
     previous_x = xy.iloc[:, 4]
-    today_y = price
+    today_y = result
 
     x1 = tf.placeholder(tf.float32, shape=[None])  # lstm score
     x2 = tf.placeholder(tf.float32, shape=[None])  # sentimental score
@@ -125,7 +157,7 @@ def start(company_code, learning_date):
                 final_w1 = sess.run(w1)
                 final_w2 = sess.run(w2)
                 final_w3 = sess.run(w3)
-            #else:
+            # else:
             #    print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(w3), "\nW2:", sess.run(w2),
             #          "\nW1:", sess.run(w1),
             #          "\nSum", sess.run(weight_sum))
