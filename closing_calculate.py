@@ -1,5 +1,6 @@
 import csv
 import os
+
 import lstm_calculator
 import news_contents_sentimental_analysis
 
@@ -7,6 +8,7 @@ PATH = "./"
 os.chdir(PATH)
 DIR = 'prediction_score'
 STOCK_DIR = 'stock'
+
 
 def predict(company_code, predict_date, w1, w2, w3):
     with open(f"./{lstm_calculator.DIR}/{company_code}/{company_code}_{predict_date}.csv", 'r', -1,
@@ -38,8 +40,7 @@ def predict(company_code, predict_date, w1, w2, w3):
     else:
         per_value_csv = 0
 
-
-
-    predicted_value = ((lstm_value * w1 + emotional_analysis_csv * w2 + per_value_csv * w3) / 100 + 1) * previous_closing_price
+    predicted_value = ((lstm_value * w1 + emotional_analysis_csv * w2 + per_value_csv * w3) / 100 + 1) \
+                      * previous_closing_price
 
     return predicted_value
