@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-
 import lstm_calculator
 import news_contents_sentimental_analysis
 
@@ -20,16 +19,18 @@ WEIGHT_FOR_PER_VALUE = 0.1  # 가중치 c: PER 점수 가중치
 PATH = "./"
 os.chdir(PATH)
 DIR = 'prediction_score'
-STOCKDIR = 'stock'
+STOCK_DIR = 'stock'
+
 
 def mkdir(company_code):
     if not os.path.exists(f"./{DIR}/{company_code}"):
         os.makedirs(f"./{DIR}/{company_code}")
 
+
 def start(company_code, learning_date):
-    learningstart_date=learning_date-relativedelta(days=30)
+    learning_start_date = learning_date - relativedelta(days=30)
     for i in range(30):
-        with open(f"./{lstm_calculator.DIR}/{company_code}/{company_code}_{learningstart_date}.csv", 'r', -1,
+        with open(f"./{lstm_calculator.DIR}/{company_code}/{company_code}_{learning_start_date}.csv", 'r', -1,
                   'utf-8') as lines:
             next(lines)
 
@@ -40,7 +41,7 @@ def start(company_code, learning_date):
         lstm_value = (lstm_prediction - previous_closing_price) / previous_closing_price  # (다음날 예측 종가 - 오늘 종가) / 오늘 종가
         # 감성분석 값 불러오기
         emotional_analysis_csv = news_contents_sentimental_analysis.calculate_two_weeks(company_code,
-                                                                                        learningstart_date)
+                                                                                        learning_start_date)
 
         # PER 값 불러오기
         company_per_csv = 0
@@ -57,10 +58,9 @@ def start(company_code, learning_date):
             per_value_csv = 1 - company_per_csv / same_category_per_csv  # 1 - 자기 회사 PER / 동일 업종 PER
         else:
             per_value_csv = 0
-    
 
         result = {
-            'LearningDate': [learningstart_date],
+            'LearningDate': [learning_start_date],
             'LstmScore': [float(lstm_value)],
             'EmotionalScore': [emotional_analysis_csv],
             'PerScore': [per_value_csv],
@@ -68,20 +68,19 @@ def start(company_code, learning_date):
         }
         prediction_df = pd.DataFrame(result, columns=["LearningDate", "LstmScore", "EmotionalScore", "PerScore",
                                                       "PreviousClosingPrice"])
-        if i==0:
+        if i == 0:
             prediction_df.to_csv(f"./{DIR}/{company_code}/{company_code}.csv", index=False, header=True)
         else:
             prediction_df.to_csv(f"./{DIR}/{company_code}/{company_code}.csv", index=False, mode='a', header=False)
 
-        learningstart_date = learningstart_date + relativedelta(days=1)
+        learning_start_date = learning_start_date + relativedelta(days=1)
 
-
-    stockstart_date=learning_date-relativedelta(days=29)
-    stock = pd.read_csv(f"./{STOCKDIR}/{company_code}.KS.csv")
+    stock_start_date = learning_date - relativedelta(days=29)
+    stock = pd.read_csv(f"./{STOCK_DIR}/{company_code}.KS.csv")
 
     stock_info = pd.DataFrame(stock)
     stock_info = stock_info.set_index(['Date'])
-    stock_info = stock_info.loc[stockstart_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
+    stock_info = stock_info.loc[stock_start_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
     stock_info = stock_info.values[0:, 1:].astype(np.float)
     price = stock_info[:, -3]
 
@@ -92,20 +91,20 @@ def start(company_code, learning_date):
     previous_x = xy.iloc[:, 4]
     today_y = price
 
-    X1 = tf.placeholder(tf.float32, shape=[None])  # lstm score
-    X2 = tf.placeholder(tf.float32, shape=[None])  # sentimental score
-    X3 = tf.placeholder(tf.float32, shape=[None])  # per score
-    X4 = tf.placeholder(tf.float32, shape=[None])  # previousday close
-    Y = tf.placeholder(tf.float32, shape=[None])  # today close
+    x1 = tf.placeholder(tf.float32, shape=[None])  # lstm score
+    x2 = tf.placeholder(tf.float32, shape=[None])  # sentimental score
+    x3 = tf.placeholder(tf.float32, shape=[None])  # per score
+    x4 = tf.placeholder(tf.float32, shape=[None])  # previous day close
+    y = tf.placeholder(tf.float32, shape=[None])  # today close
 
-    W1 = tf.Variable(0.6, dtype=tf.float32, name='W1', constraint=lambda x: tf.clip_by_value(x, 0, 1))
-    W2 = tf.Variable(0.3, dtype=tf.float32, name='W2', constraint=lambda x: tf.clip_by_value(x, 0, 1))
-    W3 = 1 - (W1 + W2)
-    sum = W1 + W2 + W3
+    w1 = tf.Variable(0.6, dtype=tf.float32, name='w1', constraint=lambda x: tf.clip_by_value(x, 0, 1))
+    w2 = tf.Variable(0.3, dtype=tf.float32, name='w2', constraint=lambda x: tf.clip_by_value(x, 0, 1))
+    w3 = 1 - (w1 + w2)
+    weight_sum = w1 + w2 + w3
 
     init_op = tf.initialize_all_variables()
-    hypothesis = ((X1 * W1 + X2 * W2 + X3 * W3) / 100 + 1) * X4
-    cost = tf.reduce_mean(tf.square(hypothesis - Y))
+    hypothesis = ((x1 * w1 + x2 * w2 + x3 * w3) / 100 + 1) * x4
+    cost = tf.reduce_mean(tf.square(hypothesis - y))
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-8)
     train = optimizer.minimize(cost)
     """
@@ -118,18 +117,20 @@ def start(company_code, learning_date):
         for step in range(5):
             cost_val, hy_val, _ = sess.run(
                 [cost, hypothesis, train],
-                feed_dict={X1: lstm_x, X2: emotional_x, X3: per_x, X4: previous_x, Y: today_y}
+                feed_dict={x1: lstm_x, x2: emotional_x, x3: per_x, x4: previous_x, y: today_y}
             )
             if step == 4:
-                print(step, "\nW3:", sess.run(W3), "\nW2:", sess.run(W2), "\nW1:", sess.run(W1), "\nSum", sess.run(sum))
+                print(step, "\nW3:", sess.run(w3), "\nW2:", sess.run(w2), "\nW1:", sess.run(w1), "\nSum",
+                      sess.run(weight_sum))
                 """
                 final_W1 = sess.run(W1)
                 final_W2 = sess.run(W2)
                 final_W3 = sess.run(W3)
                 """
             else:
-                print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(W3), "\nW2:", sess.run(W2), "\nW1:", sess.run(W1),
-                    "\nSum", sess.run(sum))
+                print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(w3), "\nW2:", sess.run(w2),
+                      "\nW1:", sess.run(w1),
+                      "\nSum", sess.run(weight_sum))
 
     # print(final_W1,final_W2,final_W3)
     """
@@ -137,4 +138,3 @@ def start(company_code, learning_date):
     final_W1, final_W2, final_W3를 return 하면 최종 가중치들 입니다. 일단 주석 처리 해놓을꼐여 
     이거 return해서 각각 순서대로 lstm, 감성분석, per에 넣어서 계산하면 됩니다.
     """
-
