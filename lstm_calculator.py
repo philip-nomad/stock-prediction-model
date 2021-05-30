@@ -26,7 +26,7 @@ RNN_CELL_HIDDEN_DIM = 20  # 각 셀의 히든 출력 크기
 FORGET_BIAS = 1.0  # 망각편향(기본값 1.0)
 NUM_STACKED_LAYERS = 1  # stacked lstm layers 개수
 KEEP_PROB = 1.0  # dropout 할때 keep 할 비율
-EPOCH_NUM = 1000  # 에포크 횟수 (몇회 반복 학습)
+EPOCH_NUM = 700  # 에포크 횟수 (몇회 반복 학습)
 LEARNING_RATE = 0.01  # 학습률
 
 if not os.path.exists(DIR):
@@ -141,7 +141,7 @@ def start(company_code, end_date):
 
     for epoch in range(EPOCH_NUM):
         _, _loss = sess.run([train, loss], feed_dict={input: train_x, output: train_y})
-        if ((epoch + 1) % 100 == 0) or (epoch == EPOCH_NUM - 1):  # 100번째마다 또는 마지막 epoch인 경우
+        if ((epoch + 1) % 50 == 0) or (epoch == EPOCH_NUM - 1):  # 100번째마다 또는 마지막 epoch인 경우
             # 학습용데이터로 rmse 오차를 구한다
             train_predict = sess.run(hypothesis, feed_dict={input: train_x})
             train_error = sess.run(rmse, feed_dict={targets: train_y, predictions: train_predict})
