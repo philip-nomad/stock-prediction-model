@@ -97,8 +97,8 @@ def start(company_code, learning_date):
     x4 = tf.placeholder(tf.float32, shape=[None])  # previous day close
     y = tf.placeholder(tf.float32, shape=[None])  # today close
 
-    w1 = tf.Variable(0.6, dtype=tf.float32, name='w1', constraint=lambda x: tf.clip_by_value(x, 0, 1))
-    w2 = tf.Variable(0.3, dtype=tf.float32, name='w2', constraint=lambda x: tf.clip_by_value(x, 0, 1))
+    w1 = tf.Variable(0.65, dtype=tf.float32, name='w1', constraint=lambda x: tf.clip_by_value(x, 0, 1))
+    w2 = tf.Variable(0.25, dtype=tf.float32, name='w2', constraint=lambda x: tf.clip_by_value(x, 0, 1))
     w3 = 1 - (w1 + w2)
     weight_sum = w1 + w2 + w3
 
@@ -125,10 +125,10 @@ def start(company_code, learning_date):
                 final_w1 = sess.run(w1)
                 final_w2 = sess.run(w2)
                 final_w3 = sess.run(w3)
-            else:
-                print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(w3), "\nW2:", sess.run(w2),
-                      "\nW1:", sess.run(w1),
-                      "\nSum", sess.run(weight_sum))
+            #else:
+            #    print(step, "Cost", cost_val, "\nPrediction:\n", hy_val, "\nW3:", sess.run(w3), "\nW2:", sess.run(w2),
+            #          "\nW1:", sess.run(w1),
+            #          "\nSum", sess.run(weight_sum))
 
     print(final_w1, final_w2, final_w3)
     return final_w1, final_w2, final_w3
