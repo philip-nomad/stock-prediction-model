@@ -1,6 +1,7 @@
 import csv
 import os
 import warnings
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -29,6 +30,8 @@ def mkdir(company_code):
 
 
 def start(company_code, learning_date):
+    mkdir(company_code)
+
     learning_start_date = learning_date - relativedelta(days=30)
     for i in range(30):
         with open(f"./{lstm_calculator.DIR}/{company_code}/{company_code}_{learning_start_date}.csv", 'r', -1,
@@ -81,7 +84,14 @@ def start(company_code, learning_date):
 
     # stock = pd.read_csv(f"./{STOCK_DIR}/{company_code}.KS.csv")
 
-    # stock_info = stock_info.set_index(['Date'])
+    #stock_info = stock_info.set_index(['Date'])
+    #while stock_start_date:
+    start_date = datetime.datetime(year= int(stock_start_date.year),month= int(stock_start_date.month),day= int(stock_start_date.day),microsecond= 0)
+    while stock_info.loc[start_date.strftime("%Y-%m-%d")] is None:
+        start_date -= relativedelta(days=1)
+
+    start_stock_info = stock_info[start_date][-3]
+
     stock_info = stock_info.loc[stock_start_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
     stock_info_date_list = list(stock_info.index)
 
@@ -114,6 +124,9 @@ def start(company_code, learning_date):
         for _ in range((learning_date - stock_info_date_list[-1].date()).days):
             result.append(temp_price)
 
+    if len(result) != 30:
+        for _ in range(30-len(result)):
+            result.insert(0, result[0])
     # result = [82000, 81900, 82300, 82300, 82300]
 
     xy = pd.read_csv(f"./{DIR}/{company_code}/{company_code}.csv")
