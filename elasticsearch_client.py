@@ -6,6 +6,7 @@ from elasticsearch import Elasticsearch
 
 import prediction
 from news_contents_sentimental_analysis import get_lstm_prediction_data, get_sentimental_score, get_score_word
+import closing_calculation
 
 HOST = 'stock-prediction-model.es.ap-northeast-2.aws.elastic-cloud.com'
 PORT = '9243'
@@ -95,6 +96,8 @@ def post_data(company_code, company_name, start_date, end_date):
     post_json_word(company_code, company_name, start_date, end_date)
     post_score_json(company_code, company_name, start_date, end_date)
     post_json_prediction_accuracy(company_code, company_name, start_date, end_date)
+    # 각각 가중치를 elasticsearch로 보내는 함수
+    post_json_weight(company_code, company_name, start_date, end_date)
 
 
 def post_json_word(company_code, company_name, start_date, end_date):
@@ -154,15 +157,20 @@ def post_score_json(company_code, company_name, start_date, end_date):
 
 def post_json_prediction_accuracy(company_code, company_name, start_date, end_date):
     while start_date <= end_date:
+        w1, w2, w3 = prediction.start(company_code, start_date)
+
+        # 바뀐 방식으로 예측 종가를 계산
+        next_date = start_date + datetime.timedelta(days=1)
+        predicted_value = closing_calculation.predict(company_code, next_date, w1, w2, w3)
+        predicted_value = round(predicted_value / 10) * 10
+
         lstm_price, closing_price = get_lstm_prediction_data(company_code, start_date - datetime.timedelta(days=1))
         _, correct_closing_price = get_lstm_prediction_data(company_code, start_date)
-        prediction_value = prediction.start(company_code, start_date)
-        predicted_price = round(closing_price * (1 + prediction_value))
         result = {
             "date": str(start_date),
             "lstm_closing_price": float(lstm_price),
             "correct_closing_price": float(correct_closing_price),
-            "predicted_closing_price": float(predicted_price),
+            "predicted_closing_price": float(predicted_value),
             "company_name": str(company_name),
             "company_code": str(company_code),
         }
@@ -170,6 +178,27 @@ def post_json_prediction_accuracy(company_code, company_name, start_date, end_da
         # elasticsearch 로 데이터 전송
         json_data = json.dumps(result, ensure_ascii=False)
         index = f"prediction-accuracy-{start_date}"
+        store_record(index, json_data)
+
+        start_date += datetime.timedelta(days=1)
+
+
+def post_json_weight(company_code, company_name, start_date, end_date):
+    while start_date <= end_date:
+        w1, w2, w3 = prediction.start(company_code, start_date)
+
+        result = {
+            "date": str(start_date),
+            "lstm_weight": float(w1),
+            "emotional_weight": float(w2),
+            "per_weight": float(w3),
+            "company_name": str(company_name),
+            "company_code": str(company_code),
+        }
+        # print(result)
+        # elasticsearch 로 데이터 전송
+        json_data = json.dumps(result, ensure_ascii=False)
+        index = f"prediction-weight-{start_date}"
         store_record(index, json_data)
 
         start_date += datetime.timedelta(days=1)

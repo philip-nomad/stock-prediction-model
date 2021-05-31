@@ -1,7 +1,6 @@
 import csv
 import os
 import warnings
-import datetime
 
 import numpy as np
 import pandas as pd
@@ -50,12 +49,16 @@ def start(company_code, learning_date):
         # PER 값 불러오기
         company_per_csv = 0
         same_category_per_csv = 0
-        with open('./per_data/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
-            next(lines)
+        try:
+            with open('./per_data/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
+                next(lines)
 
-            for line in csv.reader(lines):
-                company_per_csv = float(line[3])
-                same_category_per_csv = float(line[4])
+                for line in csv.reader(lines):
+                    company_per_csv = float(line[3])
+                    same_category_per_csv = float(line[4])
+        except FileNotFoundError:
+            company_per_csv = 0
+            same_category_per_csv = 0
 
         # 자기 회사 PER 이랑 동일업종 PER 이 모두 양수인 경우에만 per_value 계산
         if company_per_csv > 0 and same_category_per_csv > 0:
@@ -149,9 +152,9 @@ def start(company_code, learning_date):
     weight_sum = w1 + w2 + w3
 
     init_op = tf.initialize_all_variables()
-    hypothesis = ((x1 * w1 + x2 * w2 + x3 * w3) / 100 + 1) * x4
+    hypothesis = ((x1 * w1 + x2 * w2 + (x3 * w3)) / 10 + 1) * x4
     cost = tf.reduce_mean(tf.square(hypothesis - y))
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-8)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=1e-9)
     train = optimizer.minimize(cost)
 
     final_w1 = 0.0
