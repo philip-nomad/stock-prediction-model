@@ -86,11 +86,12 @@ def start(company_code, learning_date):
 
     #stock_info = stock_info.set_index(['Date'])
     #while stock_start_date:
-    start_date = datetime.datetime(year= int(stock_start_date.year),month= int(stock_start_date.month),day= int(stock_start_date.day),microsecond= 0)
-    while stock_info.loc[start_date.strftime("%Y-%m-%d")] is None:
+
+    start_date = stock_start_date
+    while stock_info.loc[start_date.strftime("%Y-%m-%d"):(start_date+relativedelta(days=1)).strftime("%Y-%m-%d")].empty:
         start_date -= relativedelta(days=1)
 
-    start_stock_info = stock_info[start_date][-3]
+    start_closing_price = stock_info.loc[start_date.strftime("%Y-%m-%d"):(start_date+relativedelta(days=1)).strftime("%Y-%m-%d")]["Close"][0]
 
     stock_info = stock_info.loc[stock_start_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
     stock_info_date_list = list(stock_info.index)
@@ -126,7 +127,7 @@ def start(company_code, learning_date):
 
     if len(result) != 30:
         for _ in range(30-len(result)):
-            result.insert(0, result[0])
+            result.insert(0, start_closing_price)
     # result = [82000, 81900, 82300, 82300, 82300]
 
     xy = pd.read_csv(f"./{DIR}/{company_code}/{company_code}.csv")

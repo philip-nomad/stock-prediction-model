@@ -42,5 +42,4 @@ def predict(company_code, predict_date, w1, w2, w3):
 
     predicted_value = ((lstm_value * w1 + emotional_analysis_csv * w2 + per_value_csv * w3) / 100 + 1) \
                       * previous_closing_price
-
     return predicted_value
