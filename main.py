@@ -1,6 +1,6 @@
 import datetime
 
-import closing_calculate
+import closing_calculation
 import kosac_preprocessor
 import lstm_calculator
 import news_contents_crawler
@@ -41,7 +41,7 @@ if __name__ == '__main__':
         w1, w2, w3 = prediction.start(company[0], learning_date)
 
         # 7. 계산된 가중치 a, b, c 를 활용하여 다음날 주가 예측
-        predicted_value = closing_calculate.predict(company[0], learning_date, w1, w2, w3)
+        predicted_value = closing_calculation.predict(company[0], learning_date, w1, w2, w3)
 
         # 7. elasticsearch 로 데이터 전송
         # elasticsearch_client.post_data(company[0], company[1], START_DATE, END_DATE)
