@@ -41,7 +41,8 @@ def start(company_code, start_date, end_date):
                     title_results.append(line[2])
                     contents_results.append(line[3])
         except FileNotFoundError:
-            print('FileNotFoundError: 해당 날짜에 뉴스기사가 존재하지 않습니다.')
+            pass
+            # print('FileNotFoundError: 해당 날짜에 뉴스기사가 존재하지 않습니다.')
         else:
             for title in title_results:
                 text = hannanum.nouns(title)

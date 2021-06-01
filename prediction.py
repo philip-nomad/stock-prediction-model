@@ -87,14 +87,18 @@ def start(company_code, learning_date):
 
     # stock = pd.read_csv(f"./{STOCK_DIR}/{company_code}.KS.csv")
 
-    #stock_info = stock_info.set_index(['Date'])
-    #while stock_start_date:
+    # stock_info = stock_info.set_index(['Date'])
+    # while stock_start_date:
 
     start_date = stock_start_date
-    while stock_info.loc[start_date.strftime("%Y-%m-%d"):(start_date+relativedelta(days=1)).strftime("%Y-%m-%d")].empty:
+    while stock_info.loc[
+          start_date.strftime("%Y-%m-%d"):(start_date + relativedelta(days=1)).strftime("%Y-%m-%d")].empty:
         start_date -= relativedelta(days=1)
 
-    start_closing_price = stock_info.loc[start_date.strftime("%Y-%m-%d"):(start_date+relativedelta(days=1)).strftime("%Y-%m-%d")]["Close"][0]
+    start_closing_price = \
+        stock_info.loc[start_date.strftime("%Y-%m-%d"):(start_date + relativedelta(days=1)).strftime("%Y-%m-%d")][
+            "Close"][
+            0]
 
     stock_info = stock_info.loc[stock_start_date.strftime("%Y-%m-%d"):learning_date.strftime("%Y-%m-%d")]
     stock_info_date_list = list(stock_info.index)
@@ -129,7 +133,7 @@ def start(company_code, learning_date):
             result.append(temp_price)
 
     if len(result) != 30:
-        for _ in range(30-len(result)):
+        for _ in range(30 - len(result)):
             result.insert(0, start_closing_price)
     # result = [82000, 81900, 82300, 82300, 82300]
 
@@ -179,7 +183,7 @@ def start(company_code, learning_date):
             #          "\nW1:", sess.run(w1),
             #          "\nSum", sess.run(weight_sum))
 
-    print(final_w1, final_w2, final_w3)
+    print(f"w1:{final_w1}, w2:{final_w2}, w3:{final_w3}")
     return final_w1, final_w2, final_w3
     """
     if 부분이 학습을 모두 끝내고 출력하는 거에여 사실 가중치들만 출력하면 되는데 일단 혹시 몰라서 학습내용도 다 출력 시켰습니다.
