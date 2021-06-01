@@ -1,6 +1,6 @@
 import csv
-import os
 import datetime
+import os
 
 import lstm_calculator
 import news_contents_sentimental_analysis
@@ -46,5 +46,11 @@ def predict(company_code, predict_date, w1, w2, w3):
     else:
         per_value_csv = 0
 
-    predicted_value = ((lstm_value * w1 + emotional_analysis_csv * w2 + (per_value_csv * w3)) / 10 + 1) * previous_closing_price
+    predicted_value = ((lstm_value * w1 + emotional_analysis_csv * w2 + (
+            per_value_csv * w3)) / 10 + 1) * previous_closing_price
+    predicted_value = round(predicted_value / 10) * 10
+
+    predict_date += datetime.timedelta(days=1)
+    print(f"{company_code} {predict_date.strftime('%Y-%m-%d')} 예측 종가: {predicted_value}")
+
     return predicted_value

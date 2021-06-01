@@ -9,9 +9,7 @@ import news_contents_sentimental_analysis
 import per_crawler
 import prediction
 
-# COMPANIES = [('005930', '삼성전자'), ('035720', '카카오'), ('035420', '네이버'), ('000660', 'SK하이닉스')]
-# COMPANIES = [('005930', '삼성전자')]
-COMPANIES = [('251270', '넷마블')]
+COMPANIES = [('032640', 'LG유플러스')]
 START_DATE = datetime.date(2021, 4, 29)
 END_DATE = datetime.date(2021, 5, 30)
 # LEARNING_DATE = datetime.date(2021, 4, 25)  # 어느 날까지 학습하여 그 다음 날 주가를 예측할 것인가
@@ -20,7 +18,6 @@ END_DATE = datetime.date(2021, 5, 30)
 if __name__ == '__main__':
     for company in COMPANIES:
         # 1. PER 정보 크롤링
-
         per_crawler.start(company[0])
 
         # 2. 뉴스기사 크롤링
@@ -44,9 +41,7 @@ if __name__ == '__main__':
 
         # 7. 계산된 가중치 a, b, c 를 활용하여 다음날 주가 예측
         predicted_value = closing_calculation.predict(company[0], learning_date, w1, w2, w3)
-        predicted_value = round(predicted_value / 10) * 10
 
-        print(f"{company[1]} {learning_date.strftime('%Y-%m-%d')} 예측 종가: {predicted_value}")
         # 7. elasticsearch 로 데이터 전송
         # 날짜를 START_DATE 와 END_DATE 를 같게 해야 합니다.
         elasticsearch_client.post_data(company[0], company[1], END_DATE, END_DATE)
