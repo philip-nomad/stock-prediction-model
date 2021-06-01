@@ -10,8 +10,8 @@ import per_crawler
 import prediction
 
 COMPANIES = [('097950', 'CJ제일제당')]
-START_DATE = datetime.date(2021, 4, 29)
-END_DATE = datetime.date(2021, 5, 30)
+START_DATE = datetime.date(2021, 4, 30)
+END_DATE = datetime.date(2021, 5, 31)
 
 # 11pm 에 돌릴 함수
 if __name__ == '__main__':
