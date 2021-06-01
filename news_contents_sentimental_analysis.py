@@ -16,7 +16,6 @@ with open('polarity.csv', 'r', -1, 'utf-8') as polarity:
 
         table[key] = {'Neg': line[3], 'Neut': line[4], 'Pos': line[6]}
 
-
 NEWS_SCORE_DIR = 'news_score'
 NEWS_SCORE_WORDS_DIR = 'news_score_words'
 NEWS_WORDS_DIR = 'news_words'
@@ -134,9 +133,11 @@ def calculate_two_weeks(company_code, target_date):
             # 기사가 아예 없는 날은 파일이 생성이 안됨
             # 기사가 있는데 전처리 후 단어가 없거나, 불용어만 있어서 점수를 계산할 수 없는 경우, pos, neu, neg 모두 0
             continue
-
-    ratio = pos_sum / (pos_sum + neg_sum)
-    portion = (ratio / 0.53) - 1
+    if pos_sum + neg_sum == 0:
+        portion = 0
+    else:
+        ratio = pos_sum / (pos_sum + neg_sum)
+        portion = (ratio / 0.53) - 1
 
     return portion
 

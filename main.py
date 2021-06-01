@@ -9,10 +9,9 @@ import news_contents_sentimental_analysis
 import per_crawler
 import prediction
 
-COMPANIES = [('032640', 'LG유플러스')]
+COMPANIES = [('097950', 'CJ제일제당')]
 START_DATE = datetime.date(2021, 4, 29)
 END_DATE = datetime.date(2021, 5, 30)
-# LEARNING_DATE = datetime.date(2021, 4, 25)  # 어느 날까지 학습하여 그 다음 날 주가를 예측할 것인가
 
 # 11pm 에 돌릴 함수
 if __name__ == '__main__':

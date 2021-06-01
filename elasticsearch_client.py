@@ -96,7 +96,7 @@ def post_data(company_code, company_name, start_date, end_date):
     post_json_word(company_code, company_name, start_date, end_date)
     post_score_json(company_code, company_name, start_date, end_date)
     post_json_prediction_accuracy(company_code, company_name, start_date, end_date)
-    # 각각 가중치를 elasticsearch로 보내는 함수
+    # 각각 가중치를 elasticsearch 로 보내는 함수
     post_json_weight(company_code, company_name, start_date, end_date)
 
 
@@ -160,8 +160,7 @@ def post_json_prediction_accuracy(company_code, company_name, start_date, end_da
         w1, w2, w3 = prediction.start(company_code, start_date)
 
         # 바뀐 방식으로 예측 종가를 계산
-        next_date = start_date + datetime.timedelta(days=1)
-        predicted_value = closing_calculation.predict(company_code, next_date, w1, w2, w3)
+        predicted_value = closing_calculation.predict(company_code, start_date, w1, w2, w3)
         predicted_value = round(predicted_value / 10) * 10
 
         lstm_price, closing_price = get_lstm_prediction_data(company_code, start_date - datetime.timedelta(days=1))
