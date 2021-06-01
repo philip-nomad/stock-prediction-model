@@ -172,8 +172,7 @@ def start(company_code, learning_date):
                 feed_dict={x1: lstm_x, x2: emotional_x, x3: per_x, x4: previous_x, y: today_y}
             )
             if step == 4:
-                print(step, "\nW3:", sess.run(w3), "\nW2:", sess.run(w2), "\nW1:", sess.run(w1), "\nSum",
-                      sess.run(weight_sum))
+                print(step, f"\nW1: {sess.run(w1)} W2: {sess.run(w2)} W3: {sess.run(w3)} Sum: {sess.run(weight_sum)}")
 
                 final_w1 = sess.run(w1)
                 final_w2 = sess.run(w2)
@@ -183,7 +182,6 @@ def start(company_code, learning_date):
             #          "\nW1:", sess.run(w1),
             #          "\nSum", sess.run(weight_sum))
 
-    print(f"w1:{final_w1}, w2:{final_w2}, w3:{final_w3}")
     return final_w1, final_w2, final_w3
     """
     if 부분이 학습을 모두 끝내고 출력하는 거에여 사실 가중치들만 출력하면 되는데 일단 혹시 몰라서 학습내용도 다 출력 시켰습니다.

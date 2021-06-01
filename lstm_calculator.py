@@ -108,7 +108,7 @@ def start(company_code, end_date):
     targets = tf.placeholder(tf.float32, [None, 1])
     predictions = tf.placeholder(tf.float32, [None, 1])
     print("targets", targets)
-    print("predictions", predictions)
+    print(f"predictions {predictions}\n")
 
     # num_stacked_layer 개의 층으로 쌓인 Stacked RNNs 생성
     stacked_rnn = [lstm_cell() for _ in range(NUM_STACKED_LAYERS)]  # Stacked LSTM Layers 개수 1
@@ -178,7 +178,7 @@ def start(company_code, end_date):
     test_predict = sess.run(hypothesis, feed_dict={input: recent_data})
     # print("test_predict", test_predict[0]) 이건 비율
     test_predict = reverse_min_max_scaling(price, test_predict)  # 금액데이터를 역정규화 함
-    print("Tomorrow's stock price", test_predict[0])  # 예측한 주가를 출력
+    print(f"Tomorrow's stock price {test_predict[0]}\n")  # 예측한 주가를 출력
 
     lstm_score = np.round(test_predict[0])
     result = {
