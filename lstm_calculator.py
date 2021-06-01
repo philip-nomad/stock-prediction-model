@@ -141,7 +141,7 @@ def start(company_code, end_date):
 
     for epoch in range(EPOCH_NUM):
         _, _loss = sess.run([train, loss], feed_dict={input: train_x, output: train_y})
-        if ((epoch + 1) % 50 == 0) or (epoch == EPOCH_NUM - 1):  # 100번째마다 또는 마지막 epoch인 경우
+        if ((epoch + 1) % 100 == 0) or (epoch == EPOCH_NUM - 1):  # 100번째마다 또는 마지막 epoch 인 경우
             # 학습용데이터로 rmse 오차를 구한다
             train_predict = sess.run(hypothesis, feed_dict={input: train_x})
             train_error = sess.run(rmse, feed_dict={targets: train_y, predictions: train_predict})
