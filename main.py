@@ -9,7 +9,7 @@ import news_contents_sentimental_analysis
 import per_crawler
 import prediction
 
-COMPANIES = [('097950', 'CJ제일제당')]
+COMPANIES = [('068270', '셀트리온')]
 START_DATE = datetime.date(2021, 4, 29)
 END_DATE = datetime.date(2021, 5, 30)
 
@@ -43,4 +43,4 @@ if __name__ == '__main__':
 
         # 7. elasticsearch 로 데이터 전송
         # 날짜를 START_DATE 와 END_DATE 를 같게 해야 합니다.
-        elasticsearch_client.post_data(company[0], company[1], END_DATE, END_DATE)
+        #elasticsearch_client.post_data(company[0], company[1], END_DATE, END_DATE)

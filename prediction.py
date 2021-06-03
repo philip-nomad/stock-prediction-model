@@ -50,12 +50,12 @@ def start(company_code, learning_date):
         company_per_csv = 0
         same_category_per_csv = 0
         try:
-            with open('./per_data/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
+            with open('./per_data/csv/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
                 next(lines)
 
                 for line in csv.reader(lines):
-                    company_per_csv = float(line[3])
-                    same_category_per_csv = float(line[4])
+                    company_per_csv = float(line[2])
+                    same_category_per_csv = float(line[3])
         except FileNotFoundError:
             company_per_csv = 0
             same_category_per_csv = 0
@@ -172,7 +172,7 @@ def start(company_code, learning_date):
                 feed_dict={x1: lstm_x, x2: emotional_x, x3: per_x, x4: previous_x, y: today_y}
             )
             if step == 4:
-                print(step, f"\nW1: {sess.run(w1)} W2: {sess.run(w2)} W3: {sess.run(w3)} Sum: {sess.run(weight_sum)}")
+                print(f"\nW1: {sess.run(w1)} W2: {sess.run(w2)} W3: {sess.run(w3)} Sum: {sess.run(weight_sum)}")
 
                 final_w1 = sess.run(w1)
                 final_w2 = sess.run(w2)

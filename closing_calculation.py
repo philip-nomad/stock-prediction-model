@@ -30,12 +30,12 @@ def predict(company_code, predict_date, w1, w2, w3):
     company_per_csv = 0
     same_category_per_csv = 0
     try:
-        with open('./per_data/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
+        with open('./per_data/csv/' + company_code + '.csv', 'r', -1, 'utf-8') as lines:
             next(lines)
 
             for line in csv.reader(lines):
-                company_per_csv = float(line[3])
-                same_category_per_csv = float(line[4])
+                company_per_csv = float(line[2])
+                same_category_per_csv = float(line[3])
     except FileNotFoundError:
         company_per_csv = 0
         same_category_per_csv = 0
