@@ -9,9 +9,10 @@ import news_contents_sentimental_analysis
 import per_crawler
 import prediction
 
-COMPANIES = [('097950', 'CJ제일제당')]
-START_DATE = datetime.date(2021, 4, 30)
-END_DATE = datetime.date(2021, 5, 31)
+COMPANIES = [('005930', '삼성전자'), ('005380', '현대자동차'), ('000660', 'SK하이닉스'), ('007310', '오뚜기'),
+             ('005940', 'NH투자증권'), ('024110', '기업은행'), ('030200', 'KT'), ('036570', '엔씨소프트')]
+START_DATE = datetime.date(2021, 4, 1)
+END_DATE = datetime.date(2021, 6, 4)
 
 # 11pm 에 돌릴 함수
 if __name__ == '__main__':
@@ -43,4 +44,4 @@ if __name__ == '__main__':
 
         # 7. elasticsearch 로 데이터 전송
         # 날짜를 START_DATE 와 END_DATE 를 같게 해야 합니다.
-        elasticsearch_client.post_data(company[0], company[1], END_DATE, END_DATE)
+        elasticsearch_client.post_data(company[0], company[1], START_DATE + datetime.timedelta(days=30), END_DATE)

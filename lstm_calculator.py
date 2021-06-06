@@ -137,8 +137,6 @@ def start(company_code, end_date):
     sess.run(tf.global_variables_initializer())
 
     # 학습
-    print('학습 시작...')
-
     for epoch in range(EPOCH_NUM):
         _, _loss = sess.run([train, loss], feed_dict={input: train_x, output: train_y})
         if ((epoch + 1) % 100 == 0) or (epoch == EPOCH_NUM - 1):  # 100번째마다 또는 마지막 epoch 인 경우
